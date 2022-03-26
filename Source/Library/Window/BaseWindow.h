@@ -94,9 +94,6 @@ namespace library
         Returns:  LRESULT
                     Integer value that your program returns to Windows
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: BaseWindow<DerivedType>::WindowProc definition (remove the comment)
-    --------------------------------------------------------------------*/
     template <class DerivedType>
     LRESULT CALLBACK BaseWindow<DerivedType>::WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
     {
@@ -132,15 +129,12 @@ namespace library
 
         Modifies: [m_hInstance, m_hWnd, m_pszWindowName].
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: BaseWindow<DerivedType>::BaseWindow definition (remove the comment)
-    --------------------------------------------------------------------*/
     template <class DerivedType>
     BaseWindow<DerivedType>::BaseWindow()
-        : m_hInstance(nullptr)
-        , m_hWnd(nullptr)
-        , m_pszWindowName(nullptr)
     {
+        m_hInstance = nullptr;
+        m_hWnd = nullptr;
+        m_pszWindowName = L"";
     }
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
@@ -151,9 +145,6 @@ namespace library
         Returns:  HWND
                     The handle to the window
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: BaseWindow<DerivedType>::GetWindow definition (remove the comment)
-    --------------------------------------------------------------------*/
     template <class DerivedType>
     HWND BaseWindow<DerivedType>::GetWindow() const
     {
@@ -194,9 +185,6 @@ namespace library
       Returns:  HRESULT
                   Status code
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: BaseWindow<DerivedType>::initialize definition (remove the comment)
-    --------------------------------------------------------------------*/
     template <class DerivedType>
     HRESULT BaseWindow<DerivedType>::initialize(
         _In_ HINSTANCE hInstance,
