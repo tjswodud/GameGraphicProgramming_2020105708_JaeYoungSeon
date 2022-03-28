@@ -101,15 +101,15 @@ namespace library
 
         if (uMsg == WM_NCCREATE)
         {
-            CREATESTRUCT* pCreate = (CREATESTRUCT*)lParam;
-            pThis = (DerivedType*)pCreate->lpCreateParams;
-            SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pThis);
+            CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+            pThis = reinterpret_cast<DerivedType*>(pCreate->lpCreateParams);
+            SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pThis));
 
             pThis->m_hWnd = hWnd;
         }
         else
         {
-            pThis = (DerivedType*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+            pThis = reinterpret_cast<DerivedType*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
         }
 
         if (pThis)
