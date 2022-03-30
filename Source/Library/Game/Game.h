@@ -37,7 +37,7 @@ namespace library
     class Game final
     {
     public:
-        Game(_In_ PCWSTR pszGameName);
+        Game(PCWSTR pszGameName);
         Game(const Game& other) = delete;
         Game(Game&& other) = delete;
         Game& operator=(const Game& other) = delete;

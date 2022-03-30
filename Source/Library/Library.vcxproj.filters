@@ -22,25 +22,37 @@
     <Filter Include="Source Files\Renderer">
       <UniqueIdentifier>{3d006df5-53fc-40cd-8abe-2ace3446f0bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game">
+      <UniqueIdentifier>{d5004333-6fb6-4b24-92a2-4374f762d500}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Renderer">
+      <UniqueIdentifier>{1dff462f-28ca-4dc2-a514-89a7551b022c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Window">
+      <UniqueIdentifier>{9d033d80-5cdd-434c-9d38-c9ae8918658e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shader">
+      <UniqueIdentifier>{cc3a0c5f-0db5-4e17-9a51-b9de9d19acb7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game\Game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\Renderer.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Game\Game.h">
+      <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="Window\BaseWindow.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Window</Filter>
     </ClInclude>
     <ClInclude Include="Window\MainWindow.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Renderer.h">
+      <Filter>Header Files\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -58,5 +70,18 @@
     <ResourceCompile Include="Resource.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\Lab03_VS.hlsl">
+      <Filter>Source Files\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Lab03_PS.hlsl">
+      <Filter>Source Files\Shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Lab03.fxh">
+      <Filter>Source Files\Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
