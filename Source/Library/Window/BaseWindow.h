@@ -97,6 +97,33 @@ namespace library
     /*--------------------------------------------------------------------
       TODO: BaseWindow<DerivedType>::WindowProc definition (remove the comment)
     --------------------------------------------------------------------*/
+    template<class DerivedType>
+    LRESULT CALLBACK BaseWindow<DerivedType>::WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
+    {
+        DerivedType* pThis = nullptr;
+
+        if (uMsg == WM_NCCREATE)
+        {
+            CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+            pThis = reinterpret_cast<DerivedType*>(pCreate->lpCreateParams);
+            SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pThis));
+
+            pThis->m_hWnd = hWnd;
+        }
+        else
+        {
+            pThis = reinterpret_cast<DerivedType*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        }
+
+        if (pThis)
+        {
+            return pThis->HandleMessage(uMsg, wParam, lParam);
+        }
+        else
+        {
+            return DefWindowProc(hWnd, uMsg, wParam, lParam);
+        }
+    }
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
         Method:   BaseWindow<DerivedType>::BaseWindow
@@ -108,6 +135,12 @@ namespace library
     /*--------------------------------------------------------------------
       TODO: BaseWindow<DerivedType>::BaseWindow definition (remove the comment)
     --------------------------------------------------------------------*/
+    template<class DerivedType>
+    BaseWindow<DerivedType>::BaseWindow()
+        : m_hInstance(nullptr)
+        , m_hWnd(nullptr)
+        , m_pszWindowName(L"")
+    { }
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
         Method:   BaseWindow<DerivedType>::GetWindow()
@@ -120,6 +153,11 @@ namespace library
     /*--------------------------------------------------------------------
       TODO: BaseWindow<DerivedType>::GetWindow definition (remove the comment)
     --------------------------------------------------------------------*/
+    template<class DerivedType>
+    HWND BaseWindow<DerivedType>::GetWindow() const
+    {
+        return m_hWnd;
+    }
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
       Method:   BaseWindow<DerivedType>::initialize
@@ -158,4 +196,53 @@ namespace library
     /*--------------------------------------------------------------------
       TODO: BaseWindow<DerivedType>::initialize definition (remove the comment)
     --------------------------------------------------------------------*/
+    template<class DerivedType>
+    HRESULT BaseWindow<DerivedType>::initialize(
+        _In_ HINSTANCE hInstance,
+        _In_ INT nCmdShow,
+        _In_ PCWSTR pszWindowName,
+        _In_ DWORD dwStyle,
+        _In_opt_ INT x,
+        _In_opt_ INT y,
+        _In_opt_ INT nWidth,
+        _In_opt_ INT nHeight,
+        _In_opt_ HWND hWndParent,
+        _In_opt_ HMENU hMenu
+    )
+    {
+        m_pszWindowName = pszWindowName;
+        m_hInstance = hInstance;
+
+        WNDCLASSEX wcex =
+        {
+            .cbSize = sizeof(WNDCLASSEX),
+            .style = CS_HREDRAW | CS_VREDRAW,
+            .lpfnWndProc = DerivedType::WindowProc,
+            .cbClsExtra = 0,
+            .cbWndExtra = 0,
+            .hInstance = hInstance,
+            .hIcon = LoadIcon(hInstance, (LPCTSTR)IDI_TUTORIAL),
+            .hCursor = LoadCursor(nullptr, IDC_ARROW),
+            .hbrBackground = (HBRUSH)(COLOR_WINDOW + 1),
+            .lpszMenuName = nullptr,
+            .lpszClassName = GetWindowClassName(),
+            .hIconSm = LoadIcon(wcex.hInstance, (LPCTSTR)IDI_TUTORIAL)
+        };
+
+        if (!RegisterClassEx(&wcex))
+        {
+            return E_FAIL;
+        }
+
+        m_hWnd = CreateWindow(wcex.lpszClassName, pszWindowName, dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, nWidth, nHeight, hWndParent, hMenu, hInstance, this);
+
+        if (!m_hWnd)
+        {
+            return E_FAIL;
+        }
+
+        ShowWindow(m_hWnd, nCmdShow);
+
+        return S_OK;
+    }
 }

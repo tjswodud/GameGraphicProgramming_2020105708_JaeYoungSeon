@@ -31,7 +31,7 @@
     <Filter Include="Header Files\Window">
       <UniqueIdentifier>{9d033d80-5cdd-434c-9d38-c9ae8918658e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Shader">
+    <Filter Include="Source Files\Shaders">
       <UniqueIdentifier>{cc3a0c5f-0db5-4e17-9a51-b9de9d19acb7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -73,15 +73,15 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Lab03_VS.hlsl">
-      <Filter>Source Files\Shader</Filter>
+      <Filter>Source Files\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Lab03_PS.hlsl">
-      <Filter>Source Files\Shader</Filter>
+      <Filter>Source Files\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Lab03.fxh">
-      <Filter>Source Files\Shader</Filter>
+      <Filter>Source Files\Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>
