@@ -12,9 +12,6 @@ namespace library
                   m_swapChain1, m_renderTargetView, m_vertexShader,
                   m_pixelShader, m_vertexLayout, m_vertexBuffer].
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: Renderer::Renderer definition (remove the comment)
-    --------------------------------------------------------------------*/
     Renderer::Renderer()
         : m_driverType(D3D_DRIVER_TYPE_NULL)
         , m_featureLevel(D3D_FEATURE_LEVEL_11_0)
@@ -47,9 +44,6 @@ namespace library
       Returns:  HRESULT
                   Status code
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: Renderer::Initialize definition (remove the comment)
-    --------------------------------------------------------------------*/
     HRESULT Renderer::Initialize(_In_ HWND hWnd)
     {
         HRESULT hr = S_OK;
@@ -89,7 +83,6 @@ namespace library
 
             if (hr == E_INVALIDARG)
             {
-                // DirectX 11.0 platforms will not recognize D3D_FEATURE_LEVEL_11_1 so we need to retry without it
                 hr = D3D11CreateDevice(nullptr, m_driverType, nullptr, createDeviceFlags, &featureLevels[1], numFeatureLevels - 1, D3D11_SDK_VERSION, m_d3dDevice.GetAddressOf(), &m_featureLevel, m_immediateContext.GetAddressOf());
             }
 
@@ -107,7 +100,7 @@ namespace library
 
             if (SUCCEEDED(hr))
             {
-                Microsoft::WRL::ComPtr< IDXGIAdapter> adapter;
+                Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
                 hr = dxgiDevice->GetAdapter(adapter.GetAddressOf());
 
                 if (SUCCEEDED(hr))
@@ -146,6 +139,7 @@ namespace library
             };
 
             hr = dxgiFactory2->CreateSwapChainForHwnd(m_d3dDevice.Get(), hWnd, &sd, nullptr, nullptr, m_swapChain1.GetAddressOf());
+
             if (SUCCEEDED(hr))
             {
                 hr = m_swapChain1.As(&m_swapChain);
@@ -175,7 +169,6 @@ namespace library
             hr = dxgiFactory->CreateSwapChain(m_d3dDevice.Get(), &sd, m_swapChain.GetAddressOf());
         }
 
-        // Note this tutorial doesn't handle full-screen swapchains so we block the ALT+ENTER shortcut
         dxgiFactory->MakeWindowAssociation(hWnd, DXGI_MWA_NO_ALT_ENTER);
 
         dxgiFactory.Reset();
@@ -281,8 +274,7 @@ namespace library
             .ByteWidth = sizeof(SimpleVertex) * 3,
             .Usage = D3D11_USAGE_DEFAULT,
             .BindFlags = D3D11_BIND_VERTEX_BUFFER,
-            .CPUAccessFlags = 0,
-
+            .CPUAccessFlags = 0
         };
 
         D3D11_SUBRESOURCE_DATA InitData = { .pSysMem = vertices };
@@ -309,9 +301,6 @@ namespace library
 
       Summary:  Render the frame
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: Renderer::Render definition (remove the comment)
-    --------------------------------------------------------------------*/
     void Renderer::Render()
     {
         // Clear the back buffer
@@ -351,9 +340,6 @@ namespace library
       Returns:  HRESULT
                   Status code
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: Renderer::compileShaderFromFile definition (remove the comment)
-    --------------------------------------------------------------------*/
     HRESULT Renderer::compileShaderFromFile(_In_ PCWSTR pszFileName, _In_ PCSTR pszEntryPoint, _In_ PCSTR szShaderModel, _Outptr_ ID3DBlob** ppBlobOut)
     {
         HRESULT hr = S_OK;
@@ -375,11 +361,6 @@ namespace library
                 OutputDebugStringA(reinterpret_cast<const char*>(pErrorBlob->GetBufferPointer()));
             }
             return hr;
-        }
-
-        if (pErrorBlob)
-        {
-            pErrorBlob->Release();
         }
 
         return S_OK;
