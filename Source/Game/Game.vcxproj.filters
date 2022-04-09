@@ -33,11 +33,11 @@
     <ClCompile Include="Cube\BigCube.cpp">
       <Filter>Source Files\Cube</Filter>
     </ClCompile>
-    <ClCompile Include="Cube\SmallCube.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Cube\CustomCube.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Cube</Filter>
+    </ClCompile>
+    <ClCompile Include="Cube\SmallCube.cpp">
+      <Filter>Source Files\Cube</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

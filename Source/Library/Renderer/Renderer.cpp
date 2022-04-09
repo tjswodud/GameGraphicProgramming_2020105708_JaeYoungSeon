@@ -8,9 +8,9 @@ namespace library
       Summary:  Constructor
 
       Modifies: [m_driverType, m_featureLevel, m_d3dDevice, m_d3dDevice1,
-                  m_immediateContext, m_immediateContext1, m_swapChain,
-                  m_swapChain1, m_renderTargetView, m_vertexShader,
-                  m_pixelShader, m_vertexLayout, m_vertexBuffer].
+                 m_immediateContext, m_immediateContext1, m_swapChain,
+                 m_swapChain1, m_renderTargetView, m_vertexShader,
+                 m_pixelShader, m_vertexLayout, m_vertexBuffer].
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
     Renderer::Renderer()
         : m_driverType(D3D_DRIVER_TYPE_NULL)
@@ -25,7 +25,7 @@ namespace library
         , m_depthStencil(nullptr)
         , m_depthStencilView(nullptr)
         , m_projection()
-        , m_view()
+        , m_camera(Camera(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f)))
         , m_renderables(std::unordered_map<PCWSTR, std::shared_ptr<Renderable>>())
         , m_vertexShaders(std::unordered_map<PCWSTR, std::shared_ptr<VertexShader>>())
         , m_pixelShaders(std::unordered_map<PCWSTR, std::shared_ptr<PixelShader>>())
@@ -40,9 +40,9 @@ namespace library
                   Handle to the window
 
       Modifies: [m_d3dDevice, m_featureLevel, m_immediateContext,
-                  m_d3dDevice1, m_immediateContext1, m_swapChain1,
-                  m_swapChain, m_renderTargetView, m_vertexShader,
-                  m_vertexLayout, m_pixelShader, m_vertexBuffer].
+                 m_d3dDevice1, m_immediateContext1, m_swapChain1,
+                 m_swapChain, m_renderTargetView, m_vertexShader,
+                 m_vertexLayout, m_pixelShader, m_vertexBuffer].
 
       Returns:  HRESULT
                   Status code
@@ -55,6 +55,25 @@ namespace library
         GetClientRect(hWnd, &rc);
         UINT width = rc.right - rc.left;
         UINT height = rc.bottom - rc.top;
+
+        //  Clip cursor to screen
+        POINT p1;
+        POINT p2;
+
+        p1.x = rc.left;
+        p1.y = rc.top;
+        p2.x = rc.right;
+        p2.y = rc.bottom;
+
+        ClientToScreen(hWnd, &p1);
+        ClientToScreen(hWnd, &p2);
+
+        rc.left = p1.x;
+        rc.top = p1.y;
+        rc.right = p2.x;
+        rc.bottom = p2.y;
+
+        ClipCursor(&rc);
 
         UINT createDeviceFlags = 0;
 #ifdef _DEBUG
@@ -207,7 +226,7 @@ namespace library
             .MipLevels = 1,
             .ArraySize = 1,
             .Format = DXGI_FORMAT_D24_UNORM_S8_UINT,
-            .SampleDesc = { .Count = 1, .Quality = 0 },
+            .SampleDesc = {.Count = 1, .Quality = 0 },
             .Usage = D3D11_USAGE_DEFAULT,
             .BindFlags = D3D11_BIND_DEPTH_STENCIL,
             .CPUAccessFlags = 0,
@@ -226,7 +245,7 @@ namespace library
         {
             .Format = descDepth.Format,
             .ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D,
-            .Texture2D = { .MipSlice = 0 }
+            .Texture2D = {.MipSlice = 0 }
         };
 
         hr = m_d3dDevice->CreateDepthStencilView(m_depthStencil.Get(), &descDSV, m_depthStencilView.GetAddressOf());
@@ -250,13 +269,6 @@ namespace library
         };
 
         m_immediateContext->RSSetViewports(1, &vp);
-
-        XMVECTOR eye = XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f);
-        XMVECTOR at = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-        XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-        // Initalize view matrix
-        m_view = XMMatrixLookAtLH(eye, at, up);
 
         // Initialize the projection matrix
         m_projection = XMMatrixPerspectiveFovLH(XM_PIDIV2, width / (FLOAT)height, 0.01f, 100.0f);
@@ -294,9 +306,6 @@ namespace library
             }
         }
 
-        // Set primitive topology
-        m_immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
         return S_OK;
     }
 
@@ -332,12 +341,16 @@ namespace library
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
       Method:   Renderer::AddVertexShader
+
       Summary:  Add the vertex shader into the renderer
+
       Args:     PCWSTR pszVertexShaderName
                   Key of the vertex shader
                 const std::shared_ptr<VertexShader>&
                   Vertex shader to add
+
       Modifies: [m_vertexShaders].
+
       Returns:  HRESULT
                   Status code
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
@@ -358,12 +371,16 @@ namespace library
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
       Method:   Renderer::AddPixelShader
+
       Summary:  Add the pixel shader into the renderer
+
       Args:     PCWSTR pszPixelShaderName
                   Key of the pixel shader
                 const std::shared_ptr<PixelShader>&
                   Pixel shader to add
+
       Modifies: [m_pixelShaders].
+
       Returns:  HRESULT
                   Status code
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
@@ -380,6 +397,23 @@ namespace library
             m_pixelShaders.insert(std::make_pair(pszPixelShaderName, pixelShader));
             return S_OK;
         }
+    }
+
+    /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+      Method:   Renderer::HandleInput
+
+      Summary:  Add the pixel shader into the renderer and initialize it
+
+      Args:     const DirectionsInput& directions
+                  Data structure containing keyboard input data
+                const MouseRelativeMovement& mouseRelativeMovement
+                  Data structure containing mouse relative input data
+
+      Modifies: [m_camera].
+    M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    void Renderer::HandleInput(_In_ const DirectionsInput& directions, _In_ const MouseRelativeMovement& mouseRelativeMovement, _In_ FLOAT deltaTime)
+    {
+        m_camera.HandleInput(directions, mouseRelativeMovement, deltaTime);
     }
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
@@ -419,16 +453,19 @@ namespace library
             m_immediateContext->IASetVertexBuffers(0, 1, renderable->second->GetVertexBuffer().GetAddressOf(), &stride, &offset);
 
             // Set the index buffer
-            m_immediateContext->IASetIndexBuffer(renderable->second->GetIndexBuffer().Get(), DXGI_FORMAT_R16_UINT, 0);\
+            m_immediateContext->IASetIndexBuffer(renderable->second->GetIndexBuffer().Get(), DXGI_FORMAT_R16_UINT, 0);
+
+            // Set primitive topology
+            m_immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
             // Set the input layout
             m_immediateContext->IASetInputLayout(renderable->second->GetVertexLayout().Get());
 
-            // Update constant buffer - 1st cube
+            // Update constant buffer
             ConstantBuffer cb =
             {
                 .World = XMMatrixTranspose(renderable->second->GetWorldMatrix()),
-                .View = XMMatrixTranspose(m_view),
+                .View = XMMatrixTranspose(m_camera.GetView()),
                 .Projection = XMMatrixTranspose(m_projection)
             };
             m_immediateContext->UpdateSubresource(renderable->second->GetConstantBuffer().Get(), 0, nullptr, &cb, 0, 0);

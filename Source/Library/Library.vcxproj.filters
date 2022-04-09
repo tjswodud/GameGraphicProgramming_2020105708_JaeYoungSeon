@@ -40,6 +40,12 @@
     <Filter Include="Source Files\Shader">
       <UniqueIdentifier>{0130042d-909c-461d-b779-00bcac70d966}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Camera">
+      <UniqueIdentifier>{274c5af6-c138-4832-9c2d-1952eabd3959}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Camera">
+      <UniqueIdentifier>{5fa603b9-2b36-4376-a90d-de3739a23164}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h">
@@ -75,6 +81,9 @@
     <ClInclude Include="Renderer\DataTypes.h">
       <Filter>Header Files\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Camera\Camera.h">
+      <Filter>Header Files\Camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game\Game.cpp">
@@ -97,6 +106,9 @@
     </ClCompile>
     <ClCompile Include="Renderer\Renderable.cpp">
       <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera\Camera.cpp">
+      <Filter>Source Files\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
