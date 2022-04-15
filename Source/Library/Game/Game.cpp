@@ -43,7 +43,7 @@ namespace library
             return hr;
         }
 
-        hr = m_renderer->Initialize(m_mainWindow->GetWindow());
+        hr = m_renderer->Initialize(m_mainWindow->GetWindow()); // error
 
         if (FAILED(hr))
         {
@@ -67,13 +67,13 @@ namespace library
         LARGE_INTEGER endingTime;
         LARGE_INTEGER frequency;
 
-        FLOAT elapsedTime;
-
-        MSG msg = { 0 };
+        FLOAT elapsedTime = 0.0f;
 
         QueryPerformanceFrequency(&frequency);
         QueryPerformanceCounter(&startingTime);
 
+        // message loop
+        MSG msg = { 0 };
         while (WM_QUIT != msg.message)
         {
             if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -84,14 +84,14 @@ namespace library
             else
             {
                 QueryPerformanceCounter(&endingTime);
-                elapsedTime = (FLOAT)(endingTime.QuadPart - startingTime.QuadPart);
-                elapsedTime /= (FLOAT)(frequency.QuadPart);
+                elapsedTime = (FLOAT)(endingTime.QuadPart - startingTime.QuadPart) / (FLOAT)(frequency.QuadPart);
+
+                QueryPerformanceCounter(&startingTime);
 
                 m_renderer->HandleInput(m_mainWindow->GetDirections(), m_mainWindow->GetMouseRelativeMovement(), elapsedTime);
 
-                m_renderer->Update(elapsedTime);
-
                 m_mainWindow->ResetMouseMovement();
+                m_renderer->Update(elapsedTime);
                 m_renderer->Render();
             }
         }

@@ -1,6 +1,21 @@
 #include "Cube/BaseCube.h"
 
 /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Method:   BaseCube::BaseCube
+
+  Summary:  Constructor
+
+  Args:     const std::filesystem::path& textureFilePath
+              Path to the texture to use
+M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+/*--------------------------------------------------------------------
+  TODO: BaseCube::BaseCube definition (remove the comment)
+--------------------------------------------------------------------*/
+BaseCube::BaseCube(const std::filesystem::path& textureFilePath)
+    : Renderable(textureFilePath)
+{ }
+
+/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Method:   BaseCube::Initialize
 
   Summary:  Initializes a basic cube
@@ -13,6 +28,9 @@
   Returns:  HRESULT
               Status code
 M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+/*--------------------------------------------------------------------
+  TODO: BaseCube::Initialize definition (remove the comment)
+--------------------------------------------------------------------*/
 HRESULT BaseCube::Initialize(_In_ ID3D11Device* pDevice, _In_ ID3D11DeviceContext* pImmediateContext)
 {
     HRESULT hr = S_OK;
@@ -34,6 +52,9 @@ HRESULT BaseCube::Initialize(_In_ ID3D11Device* pDevice, _In_ ID3D11DeviceContex
   Returns:  UINT
               Number of vertices
 M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+/*--------------------------------------------------------------------
+  TODO: BaseCube::GetNumVertices definition (remove the comment)
+--------------------------------------------------------------------*/
 UINT BaseCube::GetNumVertices() const
 {
     return NUM_VERTICES;
@@ -47,6 +68,9 @@ UINT BaseCube::GetNumVertices() const
   Returns:  UINT
               Number of indices
 M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+/*--------------------------------------------------------------------
+  TODO: BaseCube::GetNumIndices definition (remove the comment)
+--------------------------------------------------------------------*/
 UINT BaseCube::GetNumIndices() const
 {
     return NUM_INDICES;
@@ -60,6 +84,9 @@ UINT BaseCube::GetNumIndices() const
   Returns:  const library::SimpleVertex*
               Pointer to the vertices data
 M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+/*--------------------------------------------------------------------
+  TODO: BaseCube::getVertices definition (remove the comment)
+--------------------------------------------------------------------*/
 const library::SimpleVertex* BaseCube::getVertices() const
 {
     return VERTICES;
@@ -73,6 +100,9 @@ const library::SimpleVertex* BaseCube::getVertices() const
   Returns:  const WORD*
               Pointer to the indices data
 M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+/*--------------------------------------------------------------------
+  TODO: BaseCube::getIndices definition (remove the comment)
+--------------------------------------------------------------------*/
 const WORD* BaseCube::getIndices() const
 {
     return INDICES;

@@ -1,23 +1,54 @@
 #include "Renderer/Renderable.h"
+#include "Texture/DDSTextureLoader.h"
 
 namespace library
 {
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+      Method:   Renderable::Renderable
+
+      Summary:  Constructor
+
+      Args:     const std::filesystem::path& textureFilePath
+                  Path to the texture to use
+
+      Modifies: [m_vertexBuffer, m_indexBuffer, m_constantBuffer, 
+                 m_textureRV, m_samplerLinear, m_vertexShader, 
+                 m_pixelShader, m_textureFilePath, m_world].
+    M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    /*--------------------------------------------------------------------
+      TODO: Renderable::Renderable definition (remove the comment)
+    --------------------------------------------------------------------*/
+    Renderable::Renderable(_In_ const std::filesystem::path& textureFilePath)
+        : m_vertexBuffer(nullptr)
+        , m_indexBuffer(nullptr)
+        , m_constantBuffer(nullptr)
+        , m_textureRV(nullptr)
+        , m_samplerLinear(nullptr)
+        , m_vertexShader(nullptr)
+        , m_pixelShader(nullptr)
+        , m_textureFilePath(textureFilePath)
+        , m_world(XMMatrixIdentity())
+    { }
+
+    /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
       Method:   Renderable::initialize
 
-      Summary:  Initializes the buffers and the world matrix
+      Summary:  Initializes the buffers, texture, and the world matrix
 
       Args:     ID3D11Device* pDevice
                   The Direct3D device to create the buffers
                 ID3D11DeviceContext* pImmediateContext
                   The Direct3D context to set buffers
 
-      Modifies: [m_vertexBuffer, m_indexBuffer, m_constantBuffer,
-                 m_world].
+      Modifies: [m_vertexBuffer, m_indexBuffer, m_constantBuffer, 
+                 m_textureRV, m_samplerLinear, m_world].
 
       Returns:  HRESULT
                   Status code
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    /*--------------------------------------------------------------------
+      TODO: Renderable::initialize definition (remove the comment)
+    --------------------------------------------------------------------*/
     HRESULT Renderable::initialize(_In_ ID3D11Device* pDevice, _In_ ID3D11DeviceContext* pImmediateContext)
     {
         HRESULT hr = S_OK;
@@ -58,9 +89,36 @@ namespace library
             return hr;
         }
 
+        // Load the Texture
+        hr = CreateDDSTextureFromFile(pDevice, m_textureFilePath.filename().wstring().c_str(), nullptr, m_textureRV.GetAddressOf());
+
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+
+        // Create sampler state
+        D3D11_SAMPLER_DESC sampleDesc =
+        {
+            .Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
+            .AddressU = D3D11_TEXTURE_ADDRESS_WRAP,
+            .AddressV = D3D11_TEXTURE_ADDRESS_WRAP,
+            .AddressW = D3D11_TEXTURE_ADDRESS_WRAP,
+            .ComparisonFunc = D3D11_COMPARISON_NEVER,
+            .MinLOD = 0,
+            .MaxLOD = D3D11_FLOAT32_MAX
+        };
+
+        hr = pDevice->CreateSamplerState(&sampleDesc, m_samplerLinear.GetAddressOf());
+
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+
         // Create the constant buffer
         bd.Usage = D3D11_USAGE_DEFAULT;
-        bd.ByteWidth = sizeof(ConstantBuffer);
+        bd.ByteWidth = sizeof(CBChangesEveryFrame);
         bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
         bd.CPUAccessFlags = 0;
 
@@ -88,6 +146,9 @@ namespace library
 
       Modifies: [m_vertexShader].
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    /*--------------------------------------------------------------------
+      TODO: Renderable::SetVertexShader definition (remove the comment)
+    --------------------------------------------------------------------*/
     void Renderable::SetVertexShader(_In_ const std::shared_ptr<VertexShader>& vertexShader)
     {
         m_vertexShader = vertexShader;
@@ -104,6 +165,9 @@ namespace library
 
       Modifies: [m_pixelShader].
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    /*--------------------------------------------------------------------
+      TODO: Renderable::SetPixelShader definition (remove the comment)
+    --------------------------------------------------------------------*/
     void Renderable::SetPixelShader(_In_ const std::shared_ptr<PixelShader>& pixelShader)
     {
         m_pixelShader = pixelShader;
@@ -117,6 +181,9 @@ namespace library
       Returns:  ComPtr<ID3D11VertexShader>&
                   Vertex shader. Could be a nullptr
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    /*--------------------------------------------------------------------
+      TODO: Renderable::GetVertexShader definition (remove the comment)
+    --------------------------------------------------------------------*/
     ComPtr<ID3D11VertexShader>& Renderable::GetVertexShader()
     {
         return m_vertexShader->GetVertexShader();
@@ -130,6 +197,9 @@ namespace library
       Returns:  ComPtr<ID3D11PixelShader>&
                   Pixel shader. Could be a nullptr
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    /*--------------------------------------------------------------------
+      TODO: Renderable::GetPixelShader definition (remove the comment)
+    --------------------------------------------------------------------*/
     ComPtr<ID3D11PixelShader>& Renderable::GetPixelShader()
     {
         return m_pixelShader->GetPixelShader();
@@ -143,6 +213,9 @@ namespace library
       Returns:  ComPtr<ID3D11InputLayout>&
                   Vertex input layout
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    /*--------------------------------------------------------------------
+      TODO: Renderable::GetVertexLayout definition (remove the comment)
+    --------------------------------------------------------------------*/
     ComPtr<ID3D11InputLayout>& Renderable::GetVertexLayout()
     {
         return m_vertexShader->GetVertexLayout();
@@ -156,6 +229,9 @@ namespace library
       Returns:  ComPtr<ID3D11Buffer>&
                   Vertex buffer
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    /*--------------------------------------------------------------------
+      TODO: Renderable::GetVertexBuffer definition (remove the comment)
+    --------------------------------------------------------------------*/
     ComPtr<ID3D11Buffer>& Renderable::GetVertexBuffer()
     {
         return m_vertexBuffer;
@@ -169,6 +245,9 @@ namespace library
       Returns:  ComPtr<ID3D11Buffer>&
                   Index buffer
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    /*--------------------------------------------------------------------
+      TODO: Renderable::GetIndexBuffer definition (remove the comment)
+    --------------------------------------------------------------------*/
     ComPtr<ID3D11Buffer>& Renderable::GetIndexBuffer()
     {
         return m_indexBuffer;
@@ -182,6 +261,9 @@ namespace library
       Returns:  ComPtr<ID3D11Buffer>&
                   Constant buffer
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    /*--------------------------------------------------------------------
+      TODO: Renderable::GetConstantBuffer definition (remove the comment)
+    --------------------------------------------------------------------*/
     ComPtr<ID3D11Buffer>& Renderable::GetConstantBuffer()
     {
         return m_constantBuffer;
@@ -195,94 +277,43 @@ namespace library
       Returns:  const XMMATRIX&
                   World matrix
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    /*--------------------------------------------------------------------
+      TODO: Renderable::GetWorldMatrix definition (remove the comment)
+    --------------------------------------------------------------------*/
     const XMMATRIX& Renderable::GetWorldMatrix() const
     {
         return m_world;
     }
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-      Method:   Renderable::RotateX
-      Summary:  Rotates around the x-axis
-      Args:     FLOAT angle
-                  Angle of rotation around the x-axis, in radians
-      Modifies: [m_world].
+      Method:   Renderable::GetTextureResourceView
+
+      Summary:  Returns the texture resource view
+
+      Returns:  ComPtr<ID3D11ShaderResourceView>&
+                  The texture resource view
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    void Renderable::RotateX(_In_ FLOAT angle)
+    /*--------------------------------------------------------------------
+      TODO: Renderable::GetTextureResourceView definition (remove the comment)
+    --------------------------------------------------------------------*/
+    ComPtr<ID3D11ShaderResourceView>& Renderable::GetTextureResourceView()
     {
-        // m_world *= x-axis rotation by angle matrix
-        m_world *= XMMatrixRotationX(angle);
+        return m_textureRV;
     }
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-      Method:   Renderable::RotateY
-      Summary:  Rotates around the y-axis
-      Args:     FLOAT angle
-                  Angle of rotation around the y-axis, in radians
-      Modifies: [m_world].
-    M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    void Renderable::RotateY(_In_ FLOAT angle)
-    {
-        // m_world *= y-axis rotation by angle matrix
-        m_world *= XMMatrixRotationY(angle);
-    }
+      Method:   Renderable::GetSamplerState
 
-    /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-      Method:   Renderable::RotateZ
-      Summary:  Rotates around the z-axis
-      Args:     FLOAT angle
-                  Angle of rotation around the z-axis, in radians
-      Modifies: [m_world].
-    M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    void Renderable::RotateZ(_In_ FLOAT angle)
-    {
-        // m_world *= z-axis rotation by angle matrix
-        m_world *= XMMatrixRotationZ(angle);
-    }
+      Summary:  Returns the sampler state
 
-    /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-      Method:   Renderable::RotateRollPitchYaw
-      Summary:  Rotates based on a given pitch, yaw, and roll (Euler angles)
-      Args:     FLOAT pitch
-                  Angle of rotation around the x-axis, in radians
-                FLOAT yaw
-                  Angle of rotation around the y-axis, in radians
-                FLOAT roll
-                  Angle of rotation around the z-axis, in radians
-      Modifies: [m_world].
+      Returns:  ComPtr<ID3D11SamplerState>&
+                  The sampler state
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    void Renderable::RotateRollPitchYaw(_In_ FLOAT pitch, _In_ FLOAT yaw, _In_ FLOAT roll)
+    /*--------------------------------------------------------------------
+      TODO: Renderable::GetSamplerState definition (remove the comment)
+    --------------------------------------------------------------------*/
+    ComPtr<ID3D11SamplerState>& Renderable::GetSamplerState()
     {
-        // m_world *= x, y, z-axis rotation by pitch, yaw, roll matrix
-        m_world *= XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
-    }
-
-    /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-      Method:   Renderable::Scale
-      Summary:  Scales along the x-axis, y-axis, and z-axis
-      Args:     FLOAT scaleX
-                  Scaling factor along the x-axis.
-                FLOAT scaleY
-                  Scaling factor along the y-axis.
-                FLOAT scaleZ
-                  Scaling factor along the z-axis.
-      Modifies: [m_world].
-    M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    void Renderable::Scale(_In_ FLOAT scaleX, _In_ FLOAT scaleY, _In_ FLOAT scaleZ)
-    {
-        // m_world *= x, y, z-axis scaling by scale factor matrix
-        m_world *= XMMatrixScaling(scaleX, scaleY, scaleZ);
-    }
-
-    /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-      Method:   Renderable::Translate
-      Summary:  Translates matrix from a vector
-      Args:     const XMVECTOR& offset
-                  3D vector describing the translations along the x-axis, y-axis, and z-axis
-      Modifies: [m_world].
-    M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    void Renderable::Translate(_In_ const XMVECTOR& offset)
-    {
-        // m_world *= translate by offset vector matrix
-        m_world *= XMMatrixTranslationFromVector(offset);
+        return m_samplerLinear;
     }
 }

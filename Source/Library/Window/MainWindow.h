@@ -1,13 +1,9 @@
 /*+===================================================================
   File:      BASEWINDOW.H
-
   Summary:   BaseWindow header file contains declarations of the
              base class of all windows used in the library.
-
   Classes: BaseWindow<DerivedType>
-
   Functions: InitWindow, InitDevice
-
   � 2022 Kyung Hee University
 ===================================================================+*/
 #pragma once
@@ -20,9 +16,7 @@ namespace library
 {
     /*C+C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C
       Class:    MainWindow
-
       Summary:  Main window to be used in game engine
-
       Methods:  Initialize
                   Initializes window
                 GetWindowClassName
@@ -63,4 +57,3 @@ namespace library
         MouseRelativeMovement m_mouseRelativeMovement;
     };
 }
-
