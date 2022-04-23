@@ -30,12 +30,13 @@ namespace library
         , m_depthStencil(nullptr)
         , m_depthStencilView(nullptr)
         , m_cbChangeOnResize(nullptr)
-        , m_padding()
+        , m_cbLights(nullptr)
+        , m_camera(Camera(XMVectorSet(0.0f, 1.0f, -10.0f, 0.0f)))
         , m_projection(XMMatrixIdentity())
-        , m_camera(Camera(XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f)))
-        , m_renderables(std::unordered_map<std::wstring, std::shared_ptr<Renderable>>())
-        , m_vertexShaders(std::unordered_map<std::wstring, std::shared_ptr<VertexShader>>())
-        , m_pixelShaders(std::unordered_map<std::wstring, std::shared_ptr<PixelShader>>())
+        , m_renderables(std::unordered_map<PCWSTR, std::shared_ptr<Renderable>>())
+        , m_aPointLights{ std::shared_ptr<PointLight>() }
+        , m_vertexShaders(std::unordered_map<PCWSTR, std::shared_ptr<VertexShader>>())
+        , m_pixelShaders(std::unordered_map<PCWSTR, std::shared_ptr<PixelShader>>())
     { }
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
@@ -49,7 +50,7 @@ namespace library
       Modifies: [m_d3dDevice, m_featureLevel, m_immediateContext,
                  m_d3dDevice1, m_immediateContext1, m_swapChain1,
                  m_swapChain, m_renderTargetView, m_cbChangeOnResize, 
-                 m_projection, m_camera, m_vertexShaders, 
+                 m_projection, m_cbLights, m_camera, m_vertexShaders, 
                  m_pixelShaders, m_renderables].
 
       Returns:  HRESULT
@@ -68,13 +69,16 @@ namespace library
         UINT height = rc.bottom - static_cast<UINT>(rc.top);
 
         //  Clip cursor to screen
-        POINT p1;
-        POINT p2;
-
-        p1.x = rc.left;
-        p1.y = rc.top;
-        p2.x = rc.right;
-        p2.y = rc.bottom;
+        POINT p1 =
+        {
+            .x = rc.left,
+            .y = rc.top
+        };
+        POINT p2 =
+        {
+            .x = rc.right,
+            .y = rc.bottom
+        };
 
         ClientToScreen(hWnd, &p1);
         ClientToScreen(hWnd, &p2);
@@ -281,15 +285,20 @@ namespace library
 
         m_immediateContext->RSSetViewports(1, &vp);
 
-        m_camera.Initialize(m_d3dDevice.Get());
+        hr = m_camera.Initialize(m_d3dDevice.Get());
+
+        if (FAILED(hr))
+        {
+            return hr;
+        }
 
         // Initialize the projection matrix
         m_projection = XMMatrixPerspectiveFovLH(XM_PIDIV2, width / (FLOAT)height, 0.01f, 100.0f);
 
-        // Initialize pixel shaders
-        for (auto pixelShader = m_pixelShaders.begin(); pixelShader != m_pixelShaders.end(); pixelShader++)
+        // Initialize vertex shaders
+        for (auto vertexShader = m_vertexShaders.begin(); vertexShader != m_vertexShaders.end(); vertexShader++)
         {
-            hr = pixelShader->second->Initialize(m_d3dDevice.Get());
+            hr = vertexShader->second->Initialize(m_d3dDevice.Get());
 
             if (FAILED(hr))
             {
@@ -297,10 +306,10 @@ namespace library
             }
         }
 
-        // Initialize vertex shaders
-        for (auto vertexShader = m_vertexShaders.begin(); vertexShader != m_vertexShaders.end(); vertexShader++)
+        // Initialize pixel shaders
+        for (auto pixelShader = m_pixelShaders.begin(); pixelShader != m_pixelShaders.end(); pixelShader++)
         {
-            hr = vertexShader->second->Initialize(m_d3dDevice.Get());
+            hr = pixelShader->second->Initialize(m_d3dDevice.Get());
 
             if (FAILED(hr))
             {
@@ -325,7 +334,7 @@ namespace library
             .ByteWidth = sizeof(CBChangeOnResize),
             .Usage = D3D11_USAGE_DEFAULT,
             .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
-            .CPUAccessFlags = 0,
+            .CPUAccessFlags = 0
         };
 
         hr = m_d3dDevice->CreateBuffer(&bd, nullptr, m_cbChangeOnResize.GetAddressOf());
@@ -335,12 +344,30 @@ namespace library
             return hr;
         }
 
-        CBChangeOnResize cbChangeOnResize = 
+        CBChangeOnResize cbChangeOnResize =
         {
             .Projection = XMMatrixTranspose(m_projection)
         };
 
         m_immediateContext->UpdateSubresource(m_cbChangeOnResize.Get(), 0, nullptr, &cbChangeOnResize, 0, 0);
+
+        // Create a constant buffer deals with lights
+        D3D11_BUFFER_DESC bdLight =
+        {
+            .ByteWidth = sizeof(CBLights),
+            .Usage = D3D11_USAGE_DEFAULT,
+            .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
+            .CPUAccessFlags = 0,
+            .MiscFlags = 0,
+            .StructureByteStride = 0
+        };
+
+        hr = m_d3dDevice->CreateBuffer(&bdLight, nullptr, m_cbLights.GetAddressOf());
+
+        if (FAILED(hr))
+        {
+            return hr;
+        }
 
         return S_OK;
     }
@@ -348,12 +375,12 @@ namespace library
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
       Method:   Renderer::AddRenderable
 
-      Summary:  Add a renderable object and initialize the object
+      Summary:  Add a renderable object
 
       Args:     PCWSTR pszRenderableName
                   Key of the renderable object
                 const std::shared_ptr<Renderable>& renderable
-                  Unique pointer to the renderable object
+                  Shared pointer to the renderable object
 
       Modifies: [m_renderables].
 
@@ -365,7 +392,7 @@ namespace library
     --------------------------------------------------------------------*/
     HRESULT Renderer::AddRenderable(_In_ PCWSTR pszRenderableName, _In_ const std::shared_ptr<Renderable>& renderable)
     {
-        std::unordered_map<std::wstring, std::shared_ptr<Renderable>>::iterator findIterator = m_renderables.find(pszRenderableName);
+        std::unordered_map<PCWSTR, std::shared_ptr<Renderable>>::iterator findIterator = m_renderables.find(pszRenderableName);
 
         if (findIterator != m_renderables.end())
         {
@@ -374,6 +401,37 @@ namespace library
         else
         {
             m_renderables.insert(std::make_pair(pszRenderableName, renderable));
+            return S_OK;
+        }
+    }
+
+    /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+      Method:   Renderer::AddPointLight
+
+      Summary:  Add a point light
+
+      Args:     size_t index
+                  Index of the point light
+                const std::shared_ptr<PointLight>& pointLight
+                  Shared pointer to the point light object
+
+      Modifies: [m_aPointLights].
+
+      Returns:  HRESULT
+                  Status code.
+    M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    /*--------------------------------------------------------------------
+      TODO: Renderer::AddPointLight definition (remove the comment)
+    --------------------------------------------------------------------*/
+    HRESULT Renderer::AddPointLight(_In_ size_t index, _In_ const std::shared_ptr<PointLight>& pPointLight)
+    {
+        if (index >= NUM_LIGHTS)
+        {
+            return E_FAIL;
+        }
+        else
+        {
+            m_aPointLights[index] = pPointLight;
             return S_OK;
         }
     }
@@ -398,7 +456,7 @@ namespace library
     --------------------------------------------------------------------*/
     HRESULT Renderer::AddVertexShader(_In_ PCWSTR pszVertexShaderName, _In_ const std::shared_ptr<VertexShader>& vertexShader)
     {
-        std::unordered_map<std::wstring, std::shared_ptr<VertexShader>>::iterator findIterator = m_vertexShaders.find(pszVertexShaderName);
+        std::unordered_map<PCWSTR, std::shared_ptr<VertexShader>>::iterator findIterator = m_vertexShaders.find(pszVertexShaderName);
 
         if (findIterator != m_vertexShaders.end())
         {
@@ -431,7 +489,7 @@ namespace library
     --------------------------------------------------------------------*/
     HRESULT Renderer::AddPixelShader(_In_ PCWSTR pszPixelShaderName, _In_ const std::shared_ptr<PixelShader>& pixelShader)
     {
-        std::unordered_map<std::wstring, std::shared_ptr<PixelShader>>::iterator findIterator = m_pixelShaders.find(pszPixelShaderName);
+        std::unordered_map<PCWSTR, std::shared_ptr<PixelShader>>::iterator findIterator = m_pixelShaders.find(pszPixelShaderName);
 
         if (findIterator != m_pixelShaders.end())
         {
@@ -481,6 +539,11 @@ namespace library
         {
             renderable->second->Update(deltaTime);
         }
+
+        for (UINT i = 0; i < NUM_LIGHTS; ++i)
+        {
+            m_aPointLights[i]->Update(deltaTime);
+        }
     }
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
@@ -499,19 +562,28 @@ namespace library
         // Clear the depth buffer to 1.0 (maximum depth)
         m_immediateContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-        CBChangeOnCameraMovement cbChangeOnCameraMovement = 
+        // Update the camera constant buffer
+        CBChangeOnCameraMovement cbChangeOnCameraMovement =
         {
             .View = XMMatrixTranspose(m_camera.GetView())
         };
+        XMStoreFloat4(&cbChangeOnCameraMovement.CameraPosition, m_camera.GetEye());
 
         m_immediateContext->UpdateSubresource(m_camera.GetConstantBuffer().Get(), 0, nullptr, &cbChangeOnCameraMovement, 0, 0);
 
+        // Update the lights constant buffer
+        CBLights cbLights = {};
+
+        for (UINT i = 0; i < NUM_LIGHTS; ++i)
+        {
+            cbLights.LightColors[i] = m_aPointLights[i]->GetColor();
+            cbLights.LightPositions[i] = m_aPointLights[i]->GetPosition();
+        }
+
+        m_immediateContext->UpdateSubresource(m_cbLights.Get(), 0, nullptr, &cbLights, 0, 0);
+
         for (auto renderable = m_renderables.begin(); renderable != m_renderables.end(); ++renderable)
         {
-            CBChangesEveryFrame cbChangesEveryFrame;
-            cbChangesEveryFrame.World = XMMatrixTranspose(renderable->second->GetWorldMatrix());
-            m_immediateContext->UpdateSubresource(renderable->second->GetConstantBuffer().Get(), 0, nullptr, &cbChangesEveryFrame, 0, 0);
-
             // Set the vertex buffer
             UINT stride = sizeof(SimpleVertex);
             UINT offset = 0;
@@ -526,15 +598,31 @@ namespace library
             // Set the input layout
             m_immediateContext->IASetInputLayout(renderable->second->GetVertexLayout().Get());
 
+            // Create renderable constant buffer and update
+            CBChangesEveryFrame cbChangesEveryFrame =
+            {
+                .World = XMMatrixTranspose(renderable->second->GetWorldMatrix()),
+                .OutputColor = renderable->second->GetOutputColor()
+            };
+            m_immediateContext->UpdateSubresource(renderable->second->GetConstantBuffer().Get(), 0, nullptr, &cbChangesEveryFrame, 0, 0);
+
             // Render a cube
             m_immediateContext->VSSetShader(renderable->second->GetVertexShader().Get(), nullptr, 0);
             m_immediateContext->VSSetConstantBuffers(0, 1, m_camera.GetConstantBuffer().GetAddressOf());
             m_immediateContext->VSSetConstantBuffers(1, 1, m_cbChangeOnResize.GetAddressOf());
             m_immediateContext->VSSetConstantBuffers(2, 1, renderable->second->GetConstantBuffer().GetAddressOf());
+
             m_immediateContext->PSSetShader(renderable->second->GetPixelShader().Get(), nullptr, 0);
-            m_immediateContext->PSSetShaderResources(0, 1, renderable->second->GetTextureResourceView().GetAddressOf());
-            m_immediateContext->PSSetSamplers(0, 1, renderable->second->GetSamplerState().GetAddressOf());
-            m_immediateContext->DrawIndexed(36, 0, 0);
+            m_immediateContext->PSSetConstantBuffers(0, 1, m_camera.GetConstantBuffer().GetAddressOf());
+            m_immediateContext->PSSetConstantBuffers(2, 1, renderable->second->GetConstantBuffer().GetAddressOf());
+            m_immediateContext->PSSetConstantBuffers(3, 1, m_cbLights.GetAddressOf());
+
+            if (renderable->second->HasTexture())
+            {
+                m_immediateContext->PSSetShaderResources(0, 1, renderable->second->GetTextureResourceView().GetAddressOf());
+                m_immediateContext->PSSetSamplers(0, 1, renderable->second->GetSamplerState().GetAddressOf());
+            }
+            m_immediateContext->DrawIndexed(renderable->second->GetNumIndices(), 0, 0);
         }
 
         // Present the information rendered to the back buffer to the front buffer
@@ -561,8 +649,8 @@ namespace library
     --------------------------------------------------------------------*/
     HRESULT Renderer::SetVertexShaderOfRenderable(_In_ PCWSTR pszRenderableName, _In_ PCWSTR pszVertexShaderName)
     {
-        std::unordered_map<std::wstring, std::shared_ptr<Renderable>>::const_iterator renderable = m_renderables.find(pszRenderableName);
-        std::unordered_map<std::wstring, std::shared_ptr<VertexShader>>::const_iterator vertexShader = m_vertexShaders.find(pszVertexShaderName);
+        std::unordered_map<PCWSTR, std::shared_ptr<Renderable>>::const_iterator renderable = m_renderables.find(pszRenderableName);
+        std::unordered_map<PCWSTR, std::shared_ptr<VertexShader>>::const_iterator vertexShader = m_vertexShaders.find(pszVertexShaderName);
 
         if (renderable == m_renderables.end() || vertexShader == m_vertexShaders.end())
         {
@@ -594,8 +682,8 @@ namespace library
     --------------------------------------------------------------------*/
     HRESULT Renderer::SetPixelShaderOfRenderable(_In_ PCWSTR pszRenderableName, _In_ PCWSTR pszPixelShaderName)
     {
-        std::unordered_map<std::wstring, std::shared_ptr<Renderable>>::const_iterator renderable = m_renderables.find(pszRenderableName);
-        std::unordered_map<std::wstring, std::shared_ptr<PixelShader>>::const_iterator pixelShader = m_pixelShaders.find(pszPixelShaderName);
+        std::unordered_map<PCWSTR, std::shared_ptr<Renderable>>::const_iterator renderable = m_renderables.find(pszRenderableName);
+        std::unordered_map<PCWSTR, std::shared_ptr<PixelShader>>::const_iterator pixelShader = m_pixelShaders.find(pszPixelShaderName);
 
         if (renderable == m_renderables.end() || pixelShader == m_pixelShaders.end())
         {

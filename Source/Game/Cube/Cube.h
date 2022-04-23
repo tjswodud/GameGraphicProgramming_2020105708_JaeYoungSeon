@@ -30,25 +30,13 @@ C---C---C---C---C---C---C---C---C---C---C---C---C---C---C---C---C-C*/
 class Cube : public BaseCube
 {
 public:
-    Cube(const std::filesystem::path& textureFilePath);
+    Cube(_In_ const std::filesystem::path& textureFilePath);
+    Cube(_In_ const XMFLOAT4& outputColor);
     Cube(const Cube& other) = delete;
     Cube(Cube&& other) = delete;
     Cube& operator=(const Cube& other) = delete;
     Cube& operator=(Cube&& other) = delete;
     ~Cube() = default;
-
-    virtual void Update(_In_ FLOAT deltaTime) override;
-};
-
-class SwtubeCube : public BaseCube
-{
-public:
-    SwtubeCube(const std::filesystem::path& textureFilePath);
-    SwtubeCube(const SwtubeCube& other) = delete;
-    SwtubeCube(SwtubeCube&& other) = delete;
-    SwtubeCube& operator=(const SwtubeCube& other) = delete;
-    SwtubeCube& operator=(SwtubeCube&& other) = delete;
-    ~SwtubeCube() = default;
 
     virtual void Update(_In_ FLOAT deltaTime) override;
 };

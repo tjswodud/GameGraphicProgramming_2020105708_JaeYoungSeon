@@ -43,7 +43,7 @@ namespace library
             return hr;
         }
 
-        hr = m_renderer->Initialize(m_mainWindow->GetWindow()); // error
+        hr = m_renderer->Initialize(m_mainWindow->GetWindow());
 
         if (FAILED(hr))
         {

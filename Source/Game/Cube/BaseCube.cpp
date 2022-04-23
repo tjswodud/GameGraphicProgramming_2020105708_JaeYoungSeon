@@ -1,108 +1,36 @@
 #include "Cube/BaseCube.h"
 
-/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-  Method:   BaseCube::BaseCube
-
-  Summary:  Constructor
-
-  Args:     const std::filesystem::path& textureFilePath
-              Path to the texture to use
-M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-/*--------------------------------------------------------------------
-  TODO: BaseCube::BaseCube definition (remove the comment)
---------------------------------------------------------------------*/
-BaseCube::BaseCube(const std::filesystem::path& textureFilePath)
+BaseCube::BaseCube(_In_ const std::filesystem::path& textureFilePath)
     : Renderable(textureFilePath)
-{ }
-
-/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-  Method:   BaseCube::Initialize
-
-  Summary:  Initializes a basic cube
-
-  Args:     ID3D11Device* pDevice
-              The Direct3D device to create the buffers
-            ID3D11DeviceContext* pImmediateContext
-              The Direct3D context to set buffers
-
-  Returns:  HRESULT
-              Status code
-M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-/*--------------------------------------------------------------------
-  TODO: BaseCube::Initialize definition (remove the comment)
---------------------------------------------------------------------*/
-HRESULT BaseCube::Initialize(_In_ ID3D11Device* pDevice, _In_ ID3D11DeviceContext* pImmediateContext)
 {
-    HRESULT hr = S_OK;
-    hr = initialize(pDevice, pImmediateContext);
-
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    return S_OK;
 }
 
-/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-  Method:   BaseCube::GetNumVertices
+BaseCube::BaseCube(_In_ const XMFLOAT4& outputColor)
+    : Renderable(outputColor)
+{
+}
 
-  Summary:  Returns the number of vertices in the cube
-  
-  Returns:  UINT
-              Number of vertices
-M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-/*--------------------------------------------------------------------
-  TODO: BaseCube::GetNumVertices definition (remove the comment)
---------------------------------------------------------------------*/
+HRESULT BaseCube::Initialize(_In_ ID3D11Device* pDevice, _In_ ID3D11DeviceContext* pImmediateContext)
+{
+    return initialize(pDevice, pImmediateContext);
+}
+
 UINT BaseCube::GetNumVertices() const
 {
     return NUM_VERTICES;
 }
 
-/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-  Method:   BaseCube::GetNumIndices
-
-  Summary:  Returns the number of indices in the cube
-  
-  Returns:  UINT
-              Number of indices
-M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-/*--------------------------------------------------------------------
-  TODO: BaseCube::GetNumIndices definition (remove the comment)
---------------------------------------------------------------------*/
 UINT BaseCube::GetNumIndices() const
 {
     return NUM_INDICES;
 }
 
-/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-  Method:   BaseCube::getVertices
-
-  Summary:  Returns the pointer to the vertices data
-  
-  Returns:  const library::SimpleVertex*
-              Pointer to the vertices data
-M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-/*--------------------------------------------------------------------
-  TODO: BaseCube::getVertices definition (remove the comment)
---------------------------------------------------------------------*/
 const library::SimpleVertex* BaseCube::getVertices() const
 {
     return VERTICES;
 }
 
-/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-  Method:   BaseCube::getIndices
 
-  Summary:  Returns the pointer to the indices data
-  
-  Returns:  const WORD*
-              Pointer to the indices data
-M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-/*--------------------------------------------------------------------
-  TODO: BaseCube::getIndices definition (remove the comment)
---------------------------------------------------------------------*/
 const WORD* BaseCube::getIndices() const
 {
     return INDICES;
