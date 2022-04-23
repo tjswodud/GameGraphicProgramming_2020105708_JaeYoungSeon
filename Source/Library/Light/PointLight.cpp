@@ -16,9 +16,6 @@ namespace library
 
       Modifies: [m_position, m_color].
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: PointLight::PointLight definition (remove the comment)
-    --------------------------------------------------------------------*/
     PointLight::PointLight(_In_ const XMFLOAT4& position, _In_ const XMFLOAT4& color)
         : m_position(position)
         , m_color(color)
@@ -32,9 +29,6 @@ namespace library
       Returns:  const XMFLOAT4&
                   Position of the light
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: PointLight::GetPosition definition (remove the comment)
-    --------------------------------------------------------------------*/
     const XMFLOAT4& PointLight::GetPosition() const
     {
         return m_position;
@@ -48,9 +42,6 @@ namespace library
       Returns:  const XMFLOAT4&
                   Color of the light
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: PointLight::GetColor definition (remove the comment)
-    --------------------------------------------------------------------*/
     const XMFLOAT4& PointLight::GetColor() const
     {
         return m_color;
