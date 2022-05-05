@@ -1,0 +1,14 @@
+# CMake generation dependency list for this directory.
+C:/Users/tjswo/AppData/Local/Programs/Python/Python310/Lib/site-packages/cmake/data/share/cmake-3.22/Modules/CheckCSourceCompiles.cmake
+C:/Users/tjswo/AppData/Local/Programs/Python/Python310/Lib/site-packages/cmake/data/share/cmake-3.22/Modules/CheckFunctionExists.c
+C:/Users/tjswo/AppData/Local/Programs/Python/Python310/Lib/site-packages/cmake/data/share/cmake-3.22/Modules/CheckFunctionExists.cmake
+C:/Users/tjswo/AppData/Local/Programs/Python/Python310/Lib/site-packages/cmake/data/share/cmake-3.22/Modules/CheckIncludeFile.c.in
+C:/Users/tjswo/AppData/Local/Programs/Python/Python310/Lib/site-packages/cmake/data/share/cmake-3.22/Modules/CheckIncludeFile.cmake
+C:/Users/tjswo/AppData/Local/Programs/Python/Python310/Lib/site-packages/cmake/data/share/cmake-3.22/Modules/CheckIncludeFileCXX.cmake
+C:/Users/tjswo/AppData/Local/Programs/Python/Python310/Lib/site-packages/cmake/data/share/cmake-3.22/Modules/CheckTypeSize.c.in
+C:/Users/tjswo/AppData/Local/Programs/Python/Python310/Lib/site-packages/cmake/data/share/cmake-3.22/Modules/CheckTypeSize.cmake
+C:/Users/tjswo/AppData/Local/Programs/Python/Python310/Lib/site-packages/cmake/data/share/cmake-3.22/Modules/Internal/CheckSourceCompiles.cmake
+C:/Users/tjswo/assimp-master/CMakeFiles/CheckTypeSize/OFF64_T.c
+C:/Users/tjswo/assimp-master/contrib/zlib/CMakeLists.txt
+C:/Users/tjswo/assimp-master/contrib/zlib/zconf.h.cmakein
+C:/Users/tjswo/assimp-master/contrib/zlib/zlib.pc.cmakein

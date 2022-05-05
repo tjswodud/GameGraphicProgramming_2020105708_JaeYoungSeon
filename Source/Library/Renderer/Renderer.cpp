@@ -592,8 +592,15 @@ namespace library
 
             if (renderable->second->HasTexture())
             {
-                m_immediateContext->PSSetShaderResources(0, 1, renderable->second->GetTextureResourceView().GetAddressOf());
-                m_immediateContext->PSSetSamplers(0, 1, renderable->second->GetSamplerState().GetAddressOf());
+                for (UINT i = 0u; i < renderable->second->GetNumMeshes(); ++i)
+                {
+                    UINT materialIndex = renderable->second->GetMesh(i).uMaterialIndex;
+
+                    m_immediateContext->PSSetShaderResources(0, 1, renderable->second->GetMaterial(materialIndex).pDiffuse->GetTextureResourceView().GetAddressOf());
+                    m_immediateContext->PSSetSamplers(0, 1, renderable->second->GetMaterial(materialIndex).pDiffuse->GetSamplerState().GetAddressOf());
+
+                    m_immediateContext->DrawIndexed(renderable->second->GetMesh(i).uNumIndices, renderable->second->GetMesh(i).uBaseIndex, renderable->second->GetMesh(i).uBaseVertex);
+                }
             }
             m_immediateContext->DrawIndexed(renderable->second->GetNumIndices(), 0, 0);
         }

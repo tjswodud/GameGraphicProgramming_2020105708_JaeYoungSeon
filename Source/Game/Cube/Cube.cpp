@@ -5,19 +5,6 @@
 
   Summary:  Constructor
 
-  Args:     const std::filesystem::path& textureFilePath
-              Path to the texture to use
-M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-Cube::Cube(_In_ const std::filesystem::path& textureFilePath)
-    : BaseCube(textureFilePath)
-{
-}
-
-/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-  Method:   Cube::Cube
-
-  Summary:  Constructor
-
   Args:     const XMFLOAT4& outputColor
               Default color of the cube
 M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/

@@ -1,0 +1,17 @@
+C:/Users/tjswo/assimp-master/CMakeFiles/uninstall.dir
+C:/Users/tjswo/assimp-master/CMakeFiles/UpdateAssimpLibsDebugSymbolsAndDLLs.dir
+C:/Users/tjswo/assimp-master/CMakeFiles/INSTALL.dir
+C:/Users/tjswo/assimp-master/CMakeFiles/ALL_BUILD.dir
+C:/Users/tjswo/assimp-master/CMakeFiles/ZERO_CHECK.dir
+C:/Users/tjswo/assimp-master/contrib/zlib/CMakeFiles/zlibstatic.dir
+C:/Users/tjswo/assimp-master/contrib/zlib/CMakeFiles/INSTALL.dir
+C:/Users/tjswo/assimp-master/contrib/zlib/CMakeFiles/ALL_BUILD.dir
+C:/Users/tjswo/assimp-master/code/CMakeFiles/assimp.dir
+C:/Users/tjswo/assimp-master/code/CMakeFiles/INSTALL.dir
+C:/Users/tjswo/assimp-master/tools/assimp_view/CMakeFiles/assimp_viewer.dir
+C:/Users/tjswo/assimp-master/tools/assimp_view/CMakeFiles/INSTALL.dir
+C:/Users/tjswo/assimp-master/tools/assimp_cmd/CMakeFiles/assimp_cmd.dir
+C:/Users/tjswo/assimp-master/tools/assimp_cmd/CMakeFiles/INSTALL.dir
+C:/Users/tjswo/assimp-master/test/CMakeFiles/unit.dir
+C:/Users/tjswo/assimp-master/test/CMakeFiles/INSTALL.dir
+C:/Users/tjswo/assimp-master/test/headercheck/CMakeFiles/INSTALL.dir
