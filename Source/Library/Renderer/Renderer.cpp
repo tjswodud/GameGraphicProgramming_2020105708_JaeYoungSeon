@@ -27,13 +27,14 @@ namespace library
         , m_depthStencil(nullptr)
         , m_depthStencilView(nullptr)
         , m_cbChangeOnResize(nullptr)
-        , m_cbLights(nullptr)
         , m_camera(Camera(XMVectorSet(0.0f, 1.0f, -10.0f, 0.0f)))
         , m_projection(XMMatrixIdentity())
-        , m_renderables(std::unordered_map<PCWSTR, std::shared_ptr<Renderable>>())
-        , m_aPointLights{ std::shared_ptr<PointLight>() }
-        , m_vertexShaders(std::unordered_map<PCWSTR, std::shared_ptr<VertexShader>>())
-        , m_pixelShaders(std::unordered_map<PCWSTR, std::shared_ptr<PixelShader>>())
+        , m_renderables(std::unordered_map<std::wstring, std::shared_ptr<Renderable>>())
+        , m_vertexShaders(std::unordered_map<std::wstring, std::shared_ptr<VertexShader>>())
+        , m_pixelShaders(std::unordered_map<std::wstring, std::shared_ptr<PixelShader>>())
+        , m_scenes(std::unordered_map<std::wstring, std::shared_ptr<Scene>>())
+        , m_cbLights(nullptr)
+        , m_pszMainSceneName(L"")
     { }
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
@@ -84,7 +85,7 @@ namespace library
 
         ClipCursor(&rc);
 
-        UINT createDeviceFlags = 0;
+        UINT createDeviceFlags = 0u;
 #ifdef _DEBUG
         createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
@@ -254,7 +255,7 @@ namespace library
         {
             .Format = descDepth.Format,
             .ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D,
-            .Texture2D = {.MipSlice = 0 }
+            .Texture2D = { .MipSlice = 0 }
         };
 
         hr = m_d3dDevice->CreateDepthStencilView(m_depthStencil.Get(), &descDSV, m_depthStencilView.GetAddressOf());
@@ -322,6 +323,15 @@ namespace library
             }
         }
 
+        // Initialize voxels in the scene
+        for (auto voxel = m_scenes.begin(); voxel != m_scenes.end(); ++voxel)
+        {
+            for (int i = 0; i < voxel->second->GetVoxels().size(); ++i)
+            {
+                voxel->second->GetVoxels()[i]->Initialize(m_d3dDevice.Get(), m_immediateContext.Get());
+            }
+        }
+
         // Create and set constant buffer
         D3D11_BUFFER_DESC bd =
         {
@@ -383,9 +393,9 @@ namespace library
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
     HRESULT Renderer::AddRenderable(_In_ PCWSTR pszRenderableName, _In_ const std::shared_ptr<Renderable>& renderable)
     {
-        std::unordered_map<PCWSTR, std::shared_ptr<Renderable>>::iterator findIterator = m_renderables.find(pszRenderableName);
+        std::unordered_map<std::wstring, std::shared_ptr<Renderable>>::iterator iRenderable = m_renderables.find(pszRenderableName);
 
-        if (findIterator != m_renderables.end())
+        if (iRenderable != m_renderables.end())
         {
             return E_FAIL;
         }
@@ -441,9 +451,9 @@ namespace library
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
     HRESULT Renderer::AddVertexShader(_In_ PCWSTR pszVertexShaderName, _In_ const std::shared_ptr<VertexShader>& vertexShader)
     {
-        std::unordered_map<PCWSTR, std::shared_ptr<VertexShader>>::iterator findIterator = m_vertexShaders.find(pszVertexShaderName);
+        std::unordered_map<std::wstring, std::shared_ptr<VertexShader>>::iterator iVertexShader = m_vertexShaders.find(pszVertexShaderName);
 
-        if (findIterator != m_vertexShaders.end())
+        if (iVertexShader != m_vertexShaders.end())
         {
             return E_FAIL;
         }
@@ -471,9 +481,9 @@ namespace library
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
     HRESULT Renderer::AddPixelShader(_In_ PCWSTR pszPixelShaderName, _In_ const std::shared_ptr<PixelShader>& pixelShader)
     {
-        std::unordered_map<PCWSTR, std::shared_ptr<PixelShader>>::iterator findIterator = m_pixelShaders.find(pszPixelShaderName);
+        std::unordered_map<std::wstring, std::shared_ptr<PixelShader>>::iterator iPixelShader = m_pixelShaders.find(pszPixelShaderName);
 
-        if (findIterator != m_pixelShaders.end())
+        if (iPixelShader != m_pixelShaders.end())
         {
             return E_FAIL;
         }
@@ -482,6 +492,61 @@ namespace library
             m_pixelShaders.insert(std::make_pair(pszPixelShaderName, pixelShader));
             return S_OK;
         }
+    }
+
+    /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+      Method:   Renderer::AddScene
+
+      Summary:  Add a scene
+
+      Args:     PCWSTR pszSceneName
+                  Key of a scene
+                const std::filesystem::path& sceneFilePath
+                  File path to initialize a scene
+
+      Modifies: [m_scenes].
+
+      Returns:  HRESULT
+                  Status code
+    M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    HRESULT Renderer::AddScene(_In_ PCWSTR pszSceneName, const std::filesystem::path& sceneFilePath)
+    {
+        std::unordered_map<std::wstring, std::shared_ptr<Scene>>::iterator iScene = m_scenes.find(pszSceneName);
+
+        if (iScene != m_scenes.end())
+        {
+            return E_FAIL;
+        }
+        else
+        {
+            m_scenes.insert(std::make_pair(pszSceneName, std::make_shared<Scene>(sceneFilePath)));
+            return S_OK;
+        }
+    }
+
+    /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+      Method:   Renderer::SetMainScene
+
+      Summary:  Set the main scene
+
+      Args:     PCWSTR pszSceneName
+                  Name of the scene to set as the main scene
+
+      Modifies: [m_pszMainSceneName].
+
+      Returns:  HRESULT
+                  Status code
+    M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    HRESULT Renderer::SetMainScene(_In_ PCWSTR pszSceneName)
+    {
+        if (m_scenes.find(pszSceneName) == m_scenes.end())
+        {
+            return E_FAIL;
+        }
+
+        m_pszMainSceneName = pszSceneName;
+
+        return S_OK;
     }
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
@@ -516,9 +581,14 @@ namespace library
             renderable->second->Update(deltaTime);
         }
 
-        for (UINT i = 0; i < NUM_LIGHTS; ++i)
+        for (UINT i = 0u; i < NUM_LIGHTS; ++i)
         {
             m_aPointLights[i]->Update(deltaTime);
+        }
+
+        for (UINT i = 0u; i < m_scenes[m_pszMainSceneName]->GetVoxels().size(); ++i)
+        {
+            m_scenes[m_pszMainSceneName]->GetVoxels()[i]->Update(deltaTime);
         }
     }
 
@@ -533,7 +603,7 @@ namespace library
         m_immediateContext->ClearRenderTargetView(m_renderTargetView.Get(), Colors::MidnightBlue);
 
         // Clear the depth buffer to 1.0 (maximum depth)
-        m_immediateContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+        m_immediateContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0u);
 
         // Update the camera constant buffer
         CBChangeOnCameraMovement cbChangeOnCameraMovement =
@@ -542,28 +612,28 @@ namespace library
         };
         XMStoreFloat4(&cbChangeOnCameraMovement.CameraPosition, m_camera.GetEye());
 
-        m_immediateContext->UpdateSubresource(m_camera.GetConstantBuffer().Get(), 0, nullptr, &cbChangeOnCameraMovement, 0, 0);
+        m_immediateContext->UpdateSubresource(m_camera.GetConstantBuffer().Get(), 0u, nullptr, &cbChangeOnCameraMovement, 0u, 0u);
 
         // Update the lights constant buffer
         CBLights cbLights = {};
 
-        for (UINT i = 0; i < NUM_LIGHTS; ++i)
+        for (UINT i = 0u; i < NUM_LIGHTS; ++i)
         {
             cbLights.LightColors[i] = m_aPointLights[i]->GetColor();
             cbLights.LightPositions[i] = m_aPointLights[i]->GetPosition();
         }
 
-        m_immediateContext->UpdateSubresource(m_cbLights.Get(), 0, nullptr, &cbLights, 0, 0);
+        m_immediateContext->UpdateSubresource(m_cbLights.Get(), 0u, nullptr, &cbLights, 0u, 0u);
 
         for (auto renderable = m_renderables.begin(); renderable != m_renderables.end(); ++renderable)
         {
             // Set the vertex buffer
             UINT stride = sizeof(SimpleVertex);
-            UINT offset = 0;
+            UINT offset = 0u;
             m_immediateContext->IASetVertexBuffers(0, 1, renderable->second->GetVertexBuffer().GetAddressOf(), &stride, &offset);
 
             // Set the index buffer
-            m_immediateContext->IASetIndexBuffer(renderable->second->GetIndexBuffer().Get(), DXGI_FORMAT_R16_UINT, 0);
+            m_immediateContext->IASetIndexBuffer(renderable->second->GetIndexBuffer().Get(), DXGI_FORMAT_R16_UINT, 0u);
 
             // Set primitive topology
             m_immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -577,18 +647,18 @@ namespace library
                 .World = XMMatrixTranspose(renderable->second->GetWorldMatrix()),
                 .OutputColor = renderable->second->GetOutputColor()
             };
-            m_immediateContext->UpdateSubresource(renderable->second->GetConstantBuffer().Get(), 0, nullptr, &cbChangesEveryFrame, 0, 0);
+            m_immediateContext->UpdateSubresource(renderable->second->GetConstantBuffer().Get(), 0u, nullptr, &cbChangesEveryFrame, 0u, 0u);
 
-            // Render a cube
-            m_immediateContext->VSSetShader(renderable->second->GetVertexShader().Get(), nullptr, 0);
-            m_immediateContext->VSSetConstantBuffers(0, 1, m_camera.GetConstantBuffer().GetAddressOf());
-            m_immediateContext->VSSetConstantBuffers(1, 1, m_cbChangeOnResize.GetAddressOf());
-            m_immediateContext->VSSetConstantBuffers(2, 1, renderable->second->GetConstantBuffer().GetAddressOf());
+            // Render
+            m_immediateContext->VSSetShader(renderable->second->GetVertexShader().Get(), nullptr, 0u);
+            m_immediateContext->VSSetConstantBuffers(0u, 1u, m_camera.GetConstantBuffer().GetAddressOf());
+            m_immediateContext->VSSetConstantBuffers(1u, 1u, m_cbChangeOnResize.GetAddressOf());
+            m_immediateContext->VSSetConstantBuffers(2u, 1u, renderable->second->GetConstantBuffer().GetAddressOf());
 
-            m_immediateContext->PSSetShader(renderable->second->GetPixelShader().Get(), nullptr, 0);
-            m_immediateContext->PSSetConstantBuffers(0, 1, m_camera.GetConstantBuffer().GetAddressOf());
-            m_immediateContext->PSSetConstantBuffers(2, 1, renderable->second->GetConstantBuffer().GetAddressOf());
-            m_immediateContext->PSSetConstantBuffers(3, 1, m_cbLights.GetAddressOf());
+            m_immediateContext->PSSetShader(renderable->second->GetPixelShader().Get(), nullptr, 0u);
+            m_immediateContext->PSSetConstantBuffers(0u, 1u, m_camera.GetConstantBuffer().GetAddressOf());
+            m_immediateContext->PSSetConstantBuffers(2u, 1u, renderable->second->GetConstantBuffer().GetAddressOf());
+            m_immediateContext->PSSetConstantBuffers(3u, 1u, m_cbLights.GetAddressOf());
 
             if (renderable->second->HasTexture())
             {
@@ -596,13 +666,61 @@ namespace library
                 {
                     UINT materialIndex = renderable->second->GetMesh(i).uMaterialIndex;
 
-                    m_immediateContext->PSSetShaderResources(0, 1, renderable->second->GetMaterial(materialIndex).pDiffuse->GetTextureResourceView().GetAddressOf());
-                    m_immediateContext->PSSetSamplers(0, 1, renderable->second->GetMaterial(materialIndex).pDiffuse->GetSamplerState().GetAddressOf());
+                    m_immediateContext->PSSetShaderResources(0u, 1u, renderable->second->GetMaterial(materialIndex).pDiffuse->GetTextureResourceView().GetAddressOf());
+                    m_immediateContext->PSSetSamplers(0u, 1u, renderable->second->GetMaterial(materialIndex).pDiffuse->GetSamplerState().GetAddressOf());
 
                     m_immediateContext->DrawIndexed(renderable->second->GetMesh(i).uNumIndices, renderable->second->GetMesh(i).uBaseIndex, renderable->second->GetMesh(i).uBaseVertex);
                 }
             }
-            m_immediateContext->DrawIndexed(renderable->second->GetNumIndices(), 0, 0);
+            m_immediateContext->DrawIndexed(renderable->second->GetNumIndices(), 0u, 0);
+        }
+
+        // Render the main scene
+        for (auto voxel = m_scenes.begin(); voxel != m_scenes.end(); ++voxel)
+        {
+            for (UINT i = 0u; i < voxel->second->GetVoxels().size(); ++i)
+            {
+                // Set the vertex buffer
+                UINT stride = sizeof(SimpleVertex);
+                UINT offset = 0u;
+                m_immediateContext->IASetVertexBuffers(0u, 1u, voxel->second->GetVoxels()[i]->GetVertexBuffer().GetAddressOf(), &stride, &offset);
+
+                // Set the instance buffer
+                stride = sizeof(InstanceData);
+                m_immediateContext->IASetVertexBuffers(1u, 1u, voxel->second->GetVoxels()[i]->GetInstanceBuffer().GetAddressOf(), &stride, &offset);
+
+                // Set the index buffer
+                m_immediateContext->IASetIndexBuffer(voxel->second->GetVoxels()[i]->GetIndexBuffer().Get(), DXGI_FORMAT_R16_UINT, 0);
+
+                // Set primitive topology
+                m_immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+                // Set the input layout
+                m_immediateContext->IASetInputLayout(voxel->second->GetVoxels()[i]->GetVertexLayout().Get());
+
+                // Set the constant buffer
+                CBChangesEveryFrame cbChangesEveryFrame =
+                {
+                    .World = XMMatrixTranspose(voxel->second->GetVoxels()[i]->GetWorldMatrix()),
+                    .OutputColor = voxel->second->GetVoxels()[i]->GetOutputColor()
+                };
+
+                m_immediateContext->UpdateSubresource(voxel->second->GetVoxels()[i]->GetConstantBuffer().Get(), 0u, nullptr, &cbChangesEveryFrame, 0u, 0u);
+
+                // Render
+                m_immediateContext->VSSetShader(voxel->second->GetVoxels()[i]->GetVertexShader().Get(), nullptr, 0u); // exception
+                m_immediateContext->VSSetConstantBuffers(0u, 1u, m_camera.GetConstantBuffer().GetAddressOf());
+                m_immediateContext->VSSetConstantBuffers(1u, 1u, m_cbChangeOnResize.GetAddressOf());
+                m_immediateContext->VSSetConstantBuffers(2u, 1u, voxel->second->GetVoxels()[i]->GetConstantBuffer().GetAddressOf());
+
+                m_immediateContext->PSSetShader(voxel->second->GetVoxels()[i]->GetPixelShader().Get(), nullptr, 0u);
+                m_immediateContext->PSSetConstantBuffers(0u, 1u, m_camera.GetConstantBuffer().GetAddressOf());
+                m_immediateContext->PSSetConstantBuffers(2u, 1u, voxel->second->GetVoxels()[i]->GetConstantBuffer().GetAddressOf());
+                m_immediateContext->PSSetConstantBuffers(3u, 1u, m_cbLights.GetAddressOf());
+
+                // Draw
+                m_immediateContext->DrawIndexedInstanced(voxel->second->GetVoxels()[i]->GetNumIndices(), voxel->second->GetVoxels()[i]->GetNumInstances(), 0u, 0, 0u);
+            }
         }
 
         // Present the information rendered to the back buffer to the front buffer
@@ -626,15 +744,12 @@ namespace library
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
     HRESULT Renderer::SetVertexShaderOfRenderable(_In_ PCWSTR pszRenderableName, _In_ PCWSTR pszVertexShaderName)
     {
-        std::unordered_map<PCWSTR, std::shared_ptr<Renderable>>::const_iterator renderable = m_renderables.find(pszRenderableName);
-        std::unordered_map<PCWSTR, std::shared_ptr<VertexShader>>::const_iterator vertexShader = m_vertexShaders.find(pszVertexShaderName);
-
-        if (renderable == m_renderables.end() || vertexShader == m_vertexShaders.end())
+        if (m_renderables.find(pszRenderableName) == m_renderables.end() || m_vertexShaders.find(pszVertexShaderName) == m_vertexShaders.end())
         {
             return E_FAIL;
         }
 
-        renderable->second->SetVertexShader(vertexShader->second);
+        m_renderables[pszRenderableName]->SetVertexShader(m_vertexShaders[pszVertexShaderName]);
 
         return S_OK;
     }
@@ -656,18 +771,76 @@ namespace library
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
     HRESULT Renderer::SetPixelShaderOfRenderable(_In_ PCWSTR pszRenderableName, _In_ PCWSTR pszPixelShaderName)
     {
-        std::unordered_map<PCWSTR, std::shared_ptr<Renderable>>::const_iterator renderable = m_renderables.find(pszRenderableName);
-        std::unordered_map<PCWSTR, std::shared_ptr<PixelShader>>::const_iterator pixelShader = m_pixelShaders.find(pszPixelShaderName);
-
-        if (renderable == m_renderables.end() || pixelShader == m_pixelShaders.end())
+        if (m_renderables.find(pszRenderableName) == m_renderables.end() || m_pixelShaders.find(pszPixelShaderName) == m_pixelShaders.end())
         {
             return E_FAIL;
         }
 
-        renderable->second->SetPixelShader(pixelShader->second);
+        m_renderables[pszRenderableName]->SetPixelShader(m_pixelShaders[pszPixelShaderName]);
 
         return S_OK;
     }
+
+    /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+      Method:   Renderer::SetVertexShaderOfScene
+
+      Summary:  Sets the vertex shader for the voxels in a scene
+
+      Args:     PCWSTR pszSceneName
+                  Key of the scene
+                PCWSTR pszVertexShaderName
+                  Key of the vertex shader
+
+      Modifies: [m_scenes].
+
+      Returns:  HRESULT
+                  Status code
+    M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    HRESULT Renderer::SetVertexShaderOfScene(_In_ PCWSTR pszSceneName, _In_ PCWSTR pszVertexShaderName)
+    {
+        if (m_scenes.find(pszSceneName) == m_scenes.end() || m_vertexShaders.find(pszVertexShaderName) == m_vertexShaders.end())
+        {
+            return E_FAIL;
+        }
+
+        for (UINT i = 0u; i < m_scenes[pszSceneName]->GetVoxels().size(); ++i)
+        {
+            m_scenes[pszSceneName]->GetVoxels()[i]->SetVertexShader(m_vertexShaders[pszVertexShaderName]);
+        }
+
+        return S_OK;
+    }
+
+    /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+      Method:   Renderer::SetPixelShaderOfScene
+
+      Summary:  Sets the pixel shader for the voxels in a scene
+
+      Args:     PCWSTR pszRenderableName
+                  Key of the renderable
+                PCWSTR pszPixelShaderName
+                  Key of the pixel shader
+
+      Modifies: [m_renderables].
+
+      Returns:  HRESULT
+                  Status code
+    M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    HRESULT Renderer::SetPixelShaderOfScene(_In_ PCWSTR pszSceneName, _In_ PCWSTR pszPixelShaderName)
+    {
+        if (m_scenes.find(pszSceneName) == m_scenes.end() || m_pixelShaders.find(pszPixelShaderName) == m_pixelShaders.end())
+        {
+            return E_FAIL;
+        }
+
+        for (UINT i = 0u; i < m_scenes[pszSceneName]->GetVoxels().size(); ++i)
+        {
+            m_scenes[pszSceneName]->GetVoxels()[i]->SetPixelShader(m_pixelShaders[pszPixelShaderName]);
+        }
+
+        return S_OK;
+    }
+
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
       Method:   Renderer::GetDriverType

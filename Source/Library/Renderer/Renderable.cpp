@@ -52,20 +52,24 @@ namespace library
         HRESULT hr = S_OK;
 
         // Create the vertex buffer
-        D3D11_BUFFER_DESC bd =
+        D3D11_BUFFER_DESC vertexBufferDesc =
         {
             .ByteWidth = sizeof(SimpleVertex) * GetNumVertices(),
             .Usage = D3D11_USAGE_DEFAULT,
             .BindFlags = D3D11_BIND_VERTEX_BUFFER,
-            .CPUAccessFlags = 0
+            .CPUAccessFlags = 0u,
+            .MiscFlags = 0u,
+            .StructureByteStride = 0u
         };
 
-        D3D11_SUBRESOURCE_DATA InitData =
+        D3D11_SUBRESOURCE_DATA vertexInitData =
         {
-            .pSysMem = getVertices()
+            .pSysMem = getVertices(),
+            .SysMemPitch = 0u,
+            .SysMemSlicePitch = 0u
         };
 
-        hr = pDevice->CreateBuffer(&bd, &InitData, m_vertexBuffer.GetAddressOf());
+        hr = pDevice->CreateBuffer(&vertexBufferDesc, &vertexInitData, m_vertexBuffer.GetAddressOf());
 
         if (FAILED(hr))
         {
@@ -73,14 +77,22 @@ namespace library
         }
 
         // Create the index buffer
-        bd.Usage = D3D11_USAGE_DEFAULT;
-        bd.ByteWidth = static_cast<UINT>(sizeof(WORD)) * GetNumIndices();
-        bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-        bd.CPUAccessFlags = 0;
+        D3D11_BUFFER_DESC indexBufferDesc =
+        {
+            .ByteWidth = static_cast<UINT>(sizeof(WORD)) * GetNumIndices(),
+            .Usage = D3D11_USAGE_DEFAULT,
+            .BindFlags = D3D11_BIND_INDEX_BUFFER,
+            .CPUAccessFlags = 0u
+        };
 
-        InitData.pSysMem = getIndices();
+        D3D11_SUBRESOURCE_DATA indexInitData =
+        {
+            .pSysMem = getIndices(),
+            .SysMemPitch = 0u,
+            .SysMemSlicePitch = 0u
+        };
 
-        hr = pDevice->CreateBuffer(&bd, &InitData, m_indexBuffer.GetAddressOf());
+        hr = pDevice->CreateBuffer(&indexBufferDesc, &indexInitData, m_indexBuffer.GetAddressOf());
 
         if (FAILED(hr))
         {
@@ -88,15 +100,17 @@ namespace library
         }
 
         // Create the constant buffer
-        bd =
+        D3D11_BUFFER_DESC constantBufferDesc =
         {
             .ByteWidth = sizeof(CBChangesEveryFrame),
             .Usage = D3D11_USAGE_DEFAULT,
             .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
-            .CPUAccessFlags = 0
+            .CPUAccessFlags = 0,
+            .MiscFlags = 0u,
+            .StructureByteStride = 0u
         };
 
-        hr = pDevice->CreateBuffer(&bd, nullptr, m_constantBuffer.GetAddressOf());
+        hr = pDevice->CreateBuffer(&constantBufferDesc, nullptr, m_constantBuffer.GetAddressOf());
 
         if (FAILED(hr))
         {

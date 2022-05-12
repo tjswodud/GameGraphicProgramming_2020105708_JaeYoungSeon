@@ -18,8 +18,8 @@ namespace library
         , m_moveLeftRight(0.0f)
         , m_moveBackForward(0.0f)
         , m_moveUpDown(0.0f)
-        , m_travelSpeed(50.0f)
-        , m_rotationSpeed(10.0f)
+        , m_travelSpeed(10.0f)
+        , m_rotationSpeed(0.01f)
         , m_padding()
         , m_cameraForward(DEFAULT_FORWARD)
         , m_cameraRight(DEFAULT_RIGHT)
@@ -117,14 +117,12 @@ namespace library
         m_yaw += (FLOAT)mouseRelativeMovement.X * m_rotationSpeed * deltaTime;
         m_pitch += (FLOAT)mouseRelativeMovement.Y * m_rotationSpeed * deltaTime;
 
-        if (m_pitch < -XM_PIDIV2) // pitch's range : (-pi/2, pi/2)
+        if ((m_pitch + static_cast<FLOAT>(mouseRelativeMovement.Y) * m_rotationSpeed) >= -XM_PIDIV2 && (m_pitch + static_cast<FLOAT>(mouseRelativeMovement.Y) * m_rotationSpeed) <= XM_PIDIV2)
         {
-            m_pitch = -XM_PIDIV2;
+            m_pitch += static_cast<FLOAT>(mouseRelativeMovement.Y) * m_rotationSpeed;
         }
-        else if (m_pitch > XM_PIDIV2)
-        {
-            m_pitch = XM_PIDIV2;
-        }
+
+        m_yaw += static_cast<FLOAT>(mouseRelativeMovement.X) * m_rotationSpeed;
 
         if (directions.bFront) // move front
         {

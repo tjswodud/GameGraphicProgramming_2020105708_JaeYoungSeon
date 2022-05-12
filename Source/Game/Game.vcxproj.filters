@@ -93,6 +93,9 @@
     <None Include="Shaders\Shaders.fxh">
       <Filter>Source Files\Shaders</Filter>
     </None>
+    <None Include="Shaders\VoxelShaders.fxh">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="seafloor.dds" />
