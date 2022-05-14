@@ -83,9 +83,9 @@ C---C---C---C---C---C---C---C---C---C---C---C---C---C---C---C---C-C*/
 struct PS_INPUT
 {
     float4 Position : SV_POSITION;
+    float2 TexCoord : TEXCOORD0;
     float3 Normal : NORMAL;
     float3 WorldPosition : WORLDPOS;
-    float2 TexCoord : TEXCOORD0;
 };
 
 //--------------------------------------------------------------------------------------
@@ -100,10 +100,9 @@ PS_INPUT VSVoxel(VS_INPUT input)
     output.Position = mul(output.Position, View);
     output.Position = mul(output.Position, Projection);
 
+    output.TexCoord = input.TexCoord;
     output.Normal = normalize(mul(float4(input.Normal, 1), World).xyz);
-
-    // output.TexCoord = input.TexCoord;
-
+    output.WorldPosition = mul(input.Position, World);
     return output;
 }
 
