@@ -99,8 +99,9 @@
     <None Include="Shaders\SkinningShaders.fxh">
       <Filter>Source Files\Shaders</Filter>
     </None>
-    <None Include="Content\BobLampClean\boblampclean.md5anim" />
-    <None Include="Content\BobLampClean\boblampclean.md5mesh" />
+    <None Include="Content\cyborg\cyborg.blend" />
+    <None Include="Content\cyborg\cyborg.blend1" />
+    <None Include="Content\cyborg\cyborg.mtl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="seafloor.dds" />
@@ -120,5 +121,26 @@
     <Image Include="Content\BobLampClean\round_grill.jpg">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Content\Common\InvalidTexture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Content\Cube\diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Content\Cube\normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Content\cyborg\cyborg_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Content\cyborg\cyborg_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Content\cyborg\cyborg_specular.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Content\cyborg\LICENSE.txt" />
   </ItemGroup>
 </Project>

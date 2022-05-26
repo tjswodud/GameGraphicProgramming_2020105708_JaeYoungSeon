@@ -1,18 +1,14 @@
 /*+===================================================================
   File:      MODEL.H
-
   Summary:   Model header file contains declarations of
              Model class used for the lab samples of Game
              Graphics Programming course.
-
   Classes: Model
-
-  2022 Kyung Hee University
+  ?2022 Kyung Hee University
 ===================================================================+*/
 #pragma once
 
 #include "Common.h"
-
 #include "Renderer/DataTypes.h"
 #include "Renderer/Renderable.h"
 #include "Shader/PixelShader.h"
@@ -22,7 +18,6 @@
 struct aiScene;
 struct aiMesh;
 struct aiMaterial;
-
 struct aiAnimation;
 struct aiBone;
 struct aiNode;
@@ -35,12 +30,9 @@ namespace Assimp
 
 namespace library
 {
-
     /*C+C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C
       Class:    Model
-
       Summary:  Model class is a renderable from model files
-
       Methods:  Initialize
                   Pure virtual function that initializes the object
                 Update
@@ -167,6 +159,13 @@ namespace library
             _In_ UINT uIndex
         );
         HRESULT loadSpecularTexture(
+            _In_ ID3D11Device* pDevice,
+            _In_ ID3D11DeviceContext* pImmediateContext,
+            _In_ const std::filesystem::path& parentDirectory,
+            _In_ const aiMaterial* pMaterial,
+            _In_ UINT uIndex
+        );
+        HRESULT loadNormalTexture(
             _In_ ID3D11Device* pDevice,
             _In_ ID3D11DeviceContext* pImmediateContext,
             _In_ const std::filesystem::path& parentDirectory,

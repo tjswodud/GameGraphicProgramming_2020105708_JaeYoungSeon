@@ -28,8 +28,9 @@
     <FxCompile Include="Shaders\VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Content\BobLampClean\boblampclean.md5anim" />
-    <None Include="Content\BobLampClean\boblampclean.md5mesh" />
+    <None Include="Content\cyborg\cyborg.blend" />
+    <None Include="Content\cyborg\cyborg.blend1" />
+    <None Include="Content\cyborg\cyborg.mtl" />
     <None Include="Shaders\PhongShaders.fxh" />
     <None Include="Shaders\Shaders.fxh" />
     <None Include="Shaders\SkinningShaders.fxh" />
@@ -50,8 +51,17 @@
     <Image Include="Content\BobLampClean\guard1_helmet.jpg" />
     <Image Include="Content\BobLampClean\iron_grill.jpg" />
     <Image Include="Content\BobLampClean\round_grill.jpg" />
+    <Image Include="Content\Common\InvalidTexture.png" />
+    <Image Include="Content\Cube\diffuse.png" />
+    <Image Include="Content\Cube\normal.png" />
+    <Image Include="Content\cyborg\cyborg_diffuse.png" />
+    <Image Include="Content\cyborg\cyborg_normal.png" />
+    <Image Include="Content\cyborg\cyborg_specular.png" />
     <Image Include="seafloor.dds" />
     <Image Include="swtube.dds" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Content\cyborg\LICENSE.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
