@@ -102,6 +102,9 @@
     <None Include="Content\cyborg\cyborg.blend" />
     <None Include="Content\cyborg\cyborg.blend1" />
     <None Include="Content\cyborg\cyborg.mtl" />
+    <None Include="Shaders\ShadowShaders.fxh">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="seafloor.dds" />

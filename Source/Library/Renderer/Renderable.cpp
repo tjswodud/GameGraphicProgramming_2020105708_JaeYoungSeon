@@ -18,9 +18,6 @@ namespace library
                  m_pixelShader, m_outputColor, m_world, m_bHasNormalMap
                  m_aNormalData].
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: Renderable::Renderable definition (remove the comment)
-    --------------------------------------------------------------------*/
     Renderable::Renderable(_In_ const XMFLOAT4& outputColor)
         : m_vertexBuffer(nullptr)
         , m_indexBuffer(nullptr)
@@ -51,9 +48,6 @@ namespace library
       Returns:  HRESULT
                   Status code
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: Renderable::initialize definition (remove the comment)
-    --------------------------------------------------------------------*/
     HRESULT Renderable::initialize(_In_ ID3D11Device* pDevice, _In_ ID3D11DeviceContext* pImmediateContext)
     {
         HRESULT hr = S_OK;
@@ -106,7 +100,7 @@ namespace library
             return hr;
         }
 
-        if (HasTexture() && m_aNormalData.empty())
+        if (m_aNormalData.empty())
         {
             calculateNormalMapVectors();
         }
@@ -162,9 +156,6 @@ namespace library
       Summary:  Calculate tangent and bitangent vectors of every vertex
       Modifies: [m_aNormalData].
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: Renderable::calculateNormalMapVectors definition (remove the comment)
-    --------------------------------------------------------------------*/
     void Renderable::calculateNormalMapVectors()
     {
         UINT uNumFaces = GetNumIndices() / 3;
@@ -393,9 +384,6 @@ namespace library
       Returns:  ComPtr<ID3D11Buffer>&
                   Normal buffer
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: Renderable::GetNormalBuffer definition (remove the comment)
-    --------------------------------------------------------------------*/
     ComPtr<ID3D11Buffer>& Renderable::GetNormalBuffer()
     {
         return m_normalBuffer;
@@ -447,9 +435,6 @@ namespace library
       Returns:  std::shared_ptr<Material>&
                   Material
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: Renderable::GetMaterial definition (remove the comment)
-    --------------------------------------------------------------------*/
     const std::shared_ptr<Material>& Renderable::GetMaterial(UINT uIndex) const
     {
         assert(uIndex < m_aMaterials.size());
@@ -577,9 +562,6 @@ namespace library
       Summary:  Return whether the renderable has normal map
       Returns:  BOOL
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    /*--------------------------------------------------------------------
-      TODO: Renderable::HasNormalMap definition (remove the comment)
-    --------------------------------------------------------------------*/
     BOOL Renderable::HasNormalMap() const
     {
         return m_bHasNormalMap;

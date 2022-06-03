@@ -138,6 +138,12 @@
     <ClInclude Include="Shader\SkinningVertexShader.h">
       <Filter>Header Files\Shader</Filter>
     </ClInclude>
+    <ClInclude Include="Shader\ShadowVertexShader.h">
+      <Filter>Header Files\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture\RenderTexture.h">
+      <Filter>Header Files\Texture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game\Game.cpp">
@@ -193,6 +199,12 @@
     </ClCompile>
     <ClCompile Include="Shader\SkinningVertexShader.cpp">
       <Filter>Source Files\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\ShadowVertexShader.cpp">
+      <Filter>Source Files\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture\RenderTexture.cpp">
+      <Filter>Source Files\Texture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
