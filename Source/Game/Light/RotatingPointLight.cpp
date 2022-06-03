@@ -28,9 +28,8 @@ void RotatingPointLight::Update(_In_ FLOAT deltaTime)
     position = XMVector3Transform(position, rotate);
     XMStoreFloat4(&m_position, position);
 
-    m_eye = XMLoadFloat4(&m_position);
+    m_eye = position;
     m_at = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
     m_up = DEFAULT_UP;
-
     m_view = XMMatrixLookAtLH(m_eye, m_at, m_up);
 }
