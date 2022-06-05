@@ -4,7 +4,7 @@
 // Copyright (c) Kyung Hee University.
 //--------------------------------------------------------------------------------------
 
-#define NUM_LIGHTS (2)
+#define NUM_LIGHTS (1)
 
 //--------------------------------------------------------------------------------------
 // Global Variables
@@ -46,14 +46,22 @@ cbuffer cbChangesEveryFrame : register(b2)
     bool HasNormalMap;
 };
 
+struct PointLight
+{
+    float4 Position;
+    float4 Color;
+    matrix View;
+    matrix Projection;
+    float4 AttenuationDistance;
+};
+
 /*C+C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C+++C
   Cbuffer:  cbLights
   Summary:  Constant buffer used for shading
 C---C---C---C---C---C---C---C---C---C---C---C---C---C---C---C---C-C*/
 cbuffer cbLights : register(b3)
 {
-    float4 LightPositions[NUM_LIGHTS];
-    float4 LightColors[NUM_LIGHTS];
+    PointLight PointLights[NUM_LIGHTS];
 };
 
 //--------------------------------------------------------------------------------------
@@ -83,6 +91,7 @@ struct PS_INPUT
     float2 TexCoord : TEXCOORD0;
     float3 Normal : NORMAL;
     float3 WorldPosition : WORLDPOS;
+    float3 Color : COLOR;
     float3 Tangent : TANGENT;
     float3 Bitangent : BITANGENT;
 };
@@ -137,24 +146,26 @@ float4 PSVoxel(PS_INPUT input) : SV_Target
      }
 
 
-    // ambient light
-    float3 ambient = float3(0.0f, 0.0f, 0.0f);
+    // shading
+    float3 ambient = float3(0.0f, 0.0f, 0.0f); // ambient light
+    float3 diffuse = float3(0.0f, 0.0f, 0.0f); // diffuse light
+    
+    float3 viewDirection = normalize(CameraPosition.xyz - input.WorldPosition);
+    float3 lightDirection = float3(0.0f, 0.0f, 0.0f);
 
     for (uint i = 0; i < NUM_LIGHTS; ++i)
     {
-        ambient += float3(0.1f, 0.1f, 0.1f) * LightColors[i].xyz;
+        lightDirection = normalize(PointLights[i].Position.xyz - input.WorldPosition);
+        float3 reflectDirection = reflect(-lightDirection, normal);
+
+        float distance = PointLights[i].Position.xyz - input.WorldPosition;
+        float r = dot(distance, distance);
+        float r0 = PointLights[i].AttenuationDistance.z;
+        float attenuation = r0 / (r + 0.000001f);
+
+        ambient += float3(0.1f, 0.1f, 0.1f) * PointLights[i].Color.xyz * attenuation;
+        diffuse += saturate(dot(normal, lightDirection)) * PointLights[i].Color.xyz * attenuation;
     }
 
-    // diffuse light
-    float3 diffuse = float3(0.0f, 0.0f, 0.0f);
-
-    for (uint i = 0; i < NUM_LIGHTS; ++i)
-    {
-        float3 lightDirection = float3(0.0f, 0.0f, 0.0f);
-
-        lightDirection = normalize(LightPositions[i].xyz - input.WorldPosition);
-        diffuse += saturate(dot(normal, lightDirection)) * LightColors[i];
-    }
-
-    return float4(ambient + diffuse, 1.0f) * OutputColor;
+    return float4(ambient + diffuse, 1.0f) * aTextures[0].Sample(aSamplers[0], input.TexCoord);
 }

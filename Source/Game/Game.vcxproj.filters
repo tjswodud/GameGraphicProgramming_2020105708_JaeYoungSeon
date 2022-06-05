@@ -62,6 +62,12 @@
     <FxCompile Include="Shaders\VS.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\CubeMap_PS.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CubeMap_VS.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cube\BaseCube.h">
@@ -103,6 +109,9 @@
     <None Include="Content\cyborg\cyborg.blend1" />
     <None Include="Content\cyborg\cyborg.mtl" />
     <None Include="Shaders\ShadowShaders.fxh">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="Shaders\CubeMap.fxh">
       <Filter>Source Files\Shaders</Filter>
     </None>
   </ItemGroup>

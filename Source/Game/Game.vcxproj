@@ -21,6 +21,8 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Shaders\CubeMap_PS.hlsl" />
+    <FxCompile Include="Shaders\CubeMap_VS.hlsl" />
     <FxCompile Include="Shaders\PS.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">main</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">main</EntryPointName>
@@ -31,6 +33,7 @@
     <None Include="Content\cyborg\cyborg.blend" />
     <None Include="Content\cyborg\cyborg.blend1" />
     <None Include="Content\cyborg\cyborg.mtl" />
+    <None Include="Shaders\CubeMap.fxh" />
     <None Include="Shaders\PhongShaders.fxh" />
     <None Include="Shaders\Shaders.fxh" />
     <None Include="Shaders\ShadowShaders.fxh" />

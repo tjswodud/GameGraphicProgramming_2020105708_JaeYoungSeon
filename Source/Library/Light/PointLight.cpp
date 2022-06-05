@@ -14,9 +14,9 @@ namespace library
                 const XMFLOAT4& color
                   Position of the color
 
-      Modifies: [m_position, m_color].
+      Modifies: [m_position, m_color, m_attenuationDistance].
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-    PointLight::PointLight(_In_ const XMFLOAT4& position, _In_ const XMFLOAT4& color)
+    PointLight::PointLight(_In_ const XMFLOAT4& position, _In_ const XMFLOAT4& color, _In_ FLOAT attenuationDistance)
         : m_position(position)
         , m_color(color)
         , m_eye(XMVectorSet(position.x, position.y, position.z, position.w))
@@ -24,13 +24,12 @@ namespace library
         , m_up(DEFAULT_UP)
         , m_view(XMMATRIX())
         , m_projection(XMMATRIX())
+        , m_attenuationDistance(attenuationDistance)
     { }
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
       Method:   PointLight::GetPosition
-
       Summary:  Returns the position of the light
-
       Returns:  const XMFLOAT4&
                   Position of the light
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
@@ -41,9 +40,7 @@ namespace library
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
       Method:   PointLight::GetColor
-
       Summary:  Returns the color of the light
-
       Returns:  const XMFLOAT4&
                   Color of the light
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
@@ -73,6 +70,17 @@ namespace library
     }
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+      Method:   PointLight::GetAttenuationDistance
+      Summary:  Returns the attenuation distance
+      Returns:  FLOAT
+                  Attenuation distance
+    M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+    FLOAT PointLight::GetAttenuationDistance() const
+    {
+        return m_attenuationDistance;
+    }
+
+    /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
       Method:   PointLight::Initialize
       Summary:  Initialize the projection matrix
       Args:     UINT uWidth
@@ -86,9 +94,7 @@ namespace library
 
     /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
       Method:   PointLight::Update
-
       Summary:  Updates the light every frame
-
       Args:     FLOAT deltaTime
                   Elapsed time
     M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/

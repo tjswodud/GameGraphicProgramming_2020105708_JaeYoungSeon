@@ -10,8 +10,8 @@
             const XMFLOAT4& color
               Position of the color
 M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-RotatingPointLight::RotatingPointLight(_In_ const XMFLOAT4& position, _In_ const XMFLOAT4& color)
-    : PointLight(position, color)
+RotatingPointLight::RotatingPointLight(_In_ const XMFLOAT4& position, _In_ const XMFLOAT4& color, _In_ FLOAT attenuationDistance)
+    : PointLight(position, color, attenuationDistance)
 { }
 
 /*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
@@ -31,5 +31,5 @@ void RotatingPointLight::Update(_In_ FLOAT deltaTime)
     m_eye = position;
     m_at = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
     m_up = DEFAULT_UP;
-    m_view = XMMatrixLookAtLH(m_eye, m_at, m_up);
+    // m_view = XMMatrixLookAtLH(m_eye, m_at, m_up);
 }

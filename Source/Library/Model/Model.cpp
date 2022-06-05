@@ -79,7 +79,7 @@ namespace library
         m_aBoneInfo(std::vector<BoneInfo>()),
         m_aTransforms(std::vector<XMMATRIX>()),
         m_boneNameToIndexMap(std::unordered_map<std::string, UINT>()),
-        m_pScene(nullptr),
+        m_pScene(),
         m_timeSinceLoaded(0.0f),
         m_globalInverseTransform(XMMATRIX())
     {}
@@ -100,31 +100,33 @@ namespace library
     {
         HRESULT hr = S_OK;
 
-        // Create the buffers for the vertices attributes
+        m_pScene = sm_pImporter->ReadFile(m_filePath.string().c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals |
+            aiProcess_CalcTangentSpace | aiProcess_ConvertToLeftHanded);
 
-
-        m_pScene = sm_pImporter->ReadFile(m_filePath.string().c_str(),
-            aiProcess_Triangulate | aiProcess_GenSmoothNormals |
-            aiProcess_CalcTangentSpace | aiProcess_ConvertToLeftHanded
-        );
-
-        if (m_pScene)
+        if (m_pScene != nullptr)
         {
-            XMMATRIX rootNodeTransform = ConvertMatrix(m_pScene->mRootNode->mTransformation);
-            XMVECTOR det = XMMatrixDeterminant(rootNodeTransform);
-            m_globalInverseTransform = XMMatrixInverse(&det, rootNodeTransform);;
+            m_globalInverseTransform = ConvertMatrix(m_pScene->mRootNode->mTransformation);
+            XMVECTOR determinant = XMMatrixDeterminant(m_globalInverseTransform);
+            m_globalInverseTransform = XMMatrixInverse(&determinant, m_globalInverseTransform);
+
             hr = initFromScene(pDevice, pImmediateContext, m_pScene, m_filePath);
+
+            if (FAILED(hr))
+            {
+                return hr;
+            }
         }
         else
         {
-            hr = E_FAIL;
             OutputDebugString(L"Error parsing ");
             OutputDebugString(m_filePath.c_str());
             OutputDebugString(L": ");
             OutputDebugStringA(sm_pImporter->GetErrorString());
             OutputDebugString(L"\n");
-            return hr;
+
+            return E_FAIL;
         }
+
         D3D11_BUFFER_DESC animationBd = {
             .ByteWidth = sizeof(AnimationData) * (UINT)m_aAnimationData.size(),
             .Usage = D3D11_USAGE_DEFAULT,
@@ -133,14 +135,20 @@ namespace library
             .MiscFlags = 0,
             .StructureByteStride = 0
         };
+
         D3D11_SUBRESOURCE_DATA animationInitData = {
             .pSysMem = m_aAnimationData.data(),
             .SysMemPitch = 0,
             .SysMemSlicePitch = 0
         };
+
         hr = pDevice->CreateBuffer(&animationBd, &animationInitData, m_animationBuffer.GetAddressOf());
+
         if (FAILED(hr))
+        {
             return hr;
+        }
+
         D3D11_BUFFER_DESC cbSkinning = {
             .ByteWidth = sizeof(CBSkinning),
             .Usage = D3D11_USAGE_DEFAULT,
@@ -149,11 +157,14 @@ namespace library
             .MiscFlags = 0,
             .StructureByteStride = 0
         };
+
         hr = pDevice->CreateBuffer(&cbSkinning, nullptr, m_skinningConstantBuffer.GetAddressOf());
+
         if (FAILED(hr))
         {
             return hr;
         }
+
         return hr;
     }
 
@@ -169,12 +180,9 @@ namespace library
         m_timeSinceLoaded += deltaTime;
         if (m_pScene->HasAnimations())
         {
-            FLOAT ticksPerSecond =
-                static_cast<FLOAT>(m_pScene->mAnimations[0]->mTicksPerSecond !=
-                    0.0 ? m_pScene->mAnimations[0]->mTicksPerSecond : 25.0f);
+            FLOAT ticksPerSecond = static_cast<FLOAT>(m_pScene->mAnimations[0]->mTicksPerSecond != 0.0 ? m_pScene->mAnimations[0]->mTicksPerSecond : 25.0f);
             FLOAT timeInTicks = m_timeSinceLoaded * ticksPerSecond;
-            FLOAT animationTimeTicks = fmod(timeInTicks,
-                static_cast<FLOAT>(m_pScene->mAnimations[0]->mDuration));
+            FLOAT animationTimeTicks = fmod(timeInTicks, static_cast<FLOAT>(m_pScene->mAnimations[0]->mDuration));
             if (m_pScene->mRootNode)
             {
                 XMMATRIX identity = XMMatrixIdentity();
