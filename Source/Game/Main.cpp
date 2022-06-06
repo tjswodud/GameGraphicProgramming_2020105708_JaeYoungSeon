@@ -283,7 +283,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         return 0;
     }
 
-    std::shared_ptr<library::Skybox> skybox = std::make_shared<library::Skybox>(L"Content/Common/Maskonaive2_1024.dds", 1000.0f);
+    std::shared_ptr<library::Skybox> skybox = std::make_shared<library::Skybox>(L"Content/Common/Maskonaive2_1024.dds", 500.0f);
     skybox->SetVertexShader(cubeMapVertexShader);
     skybox->SetPixelShader(cubeMapPixelShader);
     if (FAILED(mainScene->AddSkyBox(skybox)))
